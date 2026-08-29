@@ -143,11 +143,18 @@ function Splash({ message }: { message: string }): JSX.Element {
 export function App(): JSX.Element {
   const status = useAppStore((s) => s.status)
   const error = useAppStore((s) => s.error)
+  const platform = useAppStore((s) => s.platform)
   const initialise = useAppStore((s) => s.initialise)
 
   useEffect(() => {
     void initialise()
   }, [initialise])
+
+  // macOS uses an inset title bar, so its traffic lights sit inside the content area.
+  // Publishing the platform lets the layout reserve room for them.
+  useEffect(() => {
+    document.documentElement.dataset.platform = platform
+  }, [platform])
 
   useClock()
   useShortcuts()

@@ -21,9 +21,12 @@ export function NavRail(): JSX.Element {
   return (
     <nav
       aria-label="Main"
-      className="flex w-[76px] shrink-0 flex-col items-center gap-1 border-r border-space-800 bg-space-950/90 py-3"
+      className="flex w-[76px] shrink-0 flex-col items-center gap-1 border-r border-space-800 bg-space-950/90 pb-3"
     >
-      <div className="mb-3 flex flex-col items-center gap-1" aria-hidden="true">
+      {/* Clears the macOS traffic lights, and doubles as a drag handle. */}
+      <div className="titlebar-drag w-full shrink-0" aria-hidden="true" />
+
+      <div className="mb-3 mt-3 flex flex-col items-center gap-1" aria-hidden="true">
         <svg width="26" height="26" viewBox="0 0 24 24" className="text-nova-400">
           <path
             d="M12 2.5 13.9 9l6.6 1.9-6.6 1.9L12 19.5 10.1 12.8 3.5 10.9 10.1 9z"

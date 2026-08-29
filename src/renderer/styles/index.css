@@ -5,6 +5,18 @@
 @layer base {
   :root {
     color-scheme: dark;
+
+    /*
+     * Height reserved at the top of the window for the operating system's own window
+     * controls. On macOS the title bar is hidden but inset, which leaves the traffic
+     * lights floating over the top-left of the content, exactly where the navigation
+     * rail's logo would otherwise sit.
+     */
+    --titlebar-inset: 0px;
+  }
+
+  :root[data-platform='darwin'] {
+    --titlebar-inset: 34px;
   }
 
   html,
@@ -70,6 +82,12 @@
     @apply inline-flex items-center gap-1 rounded-full border border-space-600 bg-space-800/70
            px-2.5 py-1 text-xs text-slate-300;
   }
+}
+
+/* The strip the traffic lights occupy is empty, so let it drag the window. */
+.titlebar-drag {
+  height: var(--titlebar-inset);
+  -webkit-app-region: drag;
 }
 
 /* Sky-map label overlay. Managed imperatively by SkyRenderer, so the styles live here

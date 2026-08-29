@@ -36,6 +36,10 @@ function createWindow(): BrowserWindow {
     backgroundColor: '#04060f',
     title: 'NovaSky',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    // Pin the traffic lights so the renderer knows exactly how much room to leave for
+    // them. They are about 14px tall, so they occupy y = 16 to 30, and the
+    // --titlebar-inset in the stylesheet reserves 34px. Keep the two in step.
+    ...(process.platform === 'darwin' ? { trafficLightPosition: { x: 18, y: 16 } } : {}),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       contextIsolation: true,
