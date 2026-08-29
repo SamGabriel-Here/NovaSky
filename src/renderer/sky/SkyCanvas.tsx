@@ -165,10 +165,25 @@ export function SkyCanvas(): JSX.Element {
    * cached locally, so returning to the same object is instant and works offline.
    */
   const [imageryNote, setImageryNote] = useState<string | null>(null)
+
+  // The camera reports a new field of view on every animation frame. Depending on the
+  // raw value would re-run this effect sixty times a second, disposing and rebuilding
+  // GPU resources each time; depending on the quantised request size instead means it
+  // runs only when the answer could actually change.
+  const zoomedIn = camera.fov <= OBJECT_IMAGERY_FOV
+  const cutoutSize = cutoutSizeFor(camera.fov)
+
   useEffect(() => {
-    if (!settings.showObjectImagery || !catalog || !selectedId) {
-      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+    /** Only touches the renderer when there is actually an image to remove. */
+    const clearImage = (): void => {
+      if (rendererRef.current?.getObjectImageId()) {
+        rendererRef.current.setObjectImage(null, null, 0, 0, 0)
+      }
       setImageryNote(null)
+    }
+
+    if (!settings.showObjectImagery || !catalog || !selectedId) {
+      clearImage()
       return
     }
     const object = catalog.objects.get(selectedId)
@@ -178,17 +193,15 @@ export function SkyCanvas(): JSX.Element {
     // the clearest way to make the point that there is nothing there to see.
     const eligible = object?.kind === 'deep-sky' || object?.kind === 'black-hole'
     if (!object || !eligible || object.ra === null || object.dec === null) {
-      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
-      setImageryNote(null)
+      clearImage()
       return
     }
-    if (camera.fov > OBJECT_IMAGERY_FOV) {
-      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
-      setImageryNote(null)
+    if (!zoomedIn) {
+      clearImage()
       return
     }
 
-    const size = cutoutSizeFor(camera.fov)
+    const size = cutoutSize
     let cancelled = false
     const timer = setTimeout(() => {
       void window.novasky
@@ -213,7 +226,7 @@ export function SkyCanvas(): JSX.Element {
               `${object.name}: ${image.source ?? 'survey image'} · ${image.origin}`
             )
           } else {
-            rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+            clearImage()
             setImageryNote(image.warning)
           }
         })
@@ -224,7 +237,7 @@ export function SkyCanvas(): JSX.Element {
       cancelled = true
       clearTimeout(timer)
     }
-  }, [selectedId, camera.fov, settings.showObjectImagery, catalog])
+  }, [selectedId, zoomedIn, cutoutSize, settings.showObjectImagery, catalog])
 
   // Satellite positions move fast enough to need their own refresh loop.
   useEffect(() => {
