@@ -145,6 +145,16 @@ back to its computed rendering whenever an image is unavailable.
 Credit: Digitized Sky Survey, served by CDS/Aladin and NASA SkyView. See the DSS
 copyright notice at <https://archive.stsci.edu/dss/copyright.html>.
 
+**Why DSS rather than a deeper survey.** CDS also serves PanSTARRS DR1 through the same
+interface, and on faint extended objects it is visibly better — more nebular filament,
+better colour. It was rejected for two reasons. It saturates badly on bright cores: a
+cutout of the Orion Nebula comes back with hard red and blue blocks where the detectors
+clipped, which is worse than no image. And it only covers declinations above about -30
+degrees, so a southern observer would get nothing. DSS is shallower but uniform across
+the whole sky and well behaved on bright targets, which matters more for the objects
+people actually look up. A per-object choice — PanSTARRS for faint targets, DSS for
+bright ones — would work, and is the obvious place to start if this is revisited.
+
 ## Calculated values
 
 ### Ephemeris — astronomy-engine
