@@ -209,3 +209,5 @@ downloads and for erasing everything the app has stored.
 MIT for the code. The bundled catalogues and imagery are other people's work and keep
 their own licences, listed in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) and summarised
 in [LICENSE](LICENSE).
+
+Written by Sam Gabriel, with Claude (Anthropic) as a pair programmer.

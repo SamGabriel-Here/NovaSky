@@ -8,6 +8,9 @@
     "email": "SamGabriel-Here@users.noreply.github.com",
     "url": "https://github.com/SamGabriel-Here"
   },
+  "contributors": [
+    "Claude (Anthropic)"
+  ],
   "license": "MIT",
   "private": true,
   "engines": {
