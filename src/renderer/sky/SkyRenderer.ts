@@ -838,14 +838,13 @@ export class SkyRenderer {
     if (this.skyImage) {
       this.skyGroup.remove(this.skyImage)
       this.skyImage.geometry.dispose()
-      ;(this.skyImage.material as THREE.Material).dispose()
+      disposeShaderMaterial(this.skyImage.material as THREE.ShaderMaterial)
       this.skyImage = null
     }
     if (bytes.byteLength === 0) return
 
-    const { texture, release } = loadJpegTexture(bytes)
+    const texture = loadJpegTexture(bytes)
     texture.colorSpace = THREE.SRGBColorSpace
-    void release
     // No mipmaps: the sampler wraps in longitude, and mipmapped wrapping produces a
     // visible seam down the anti-centre of the galaxy.
     texture.minFilter = THREE.LinearFilter
@@ -892,13 +891,13 @@ export class SkyRenderer {
     if (this.objectImage) {
       this.skyGroup.remove(this.objectImage)
       this.objectImage.geometry.dispose()
-      ;(this.objectImage.material as THREE.Material).dispose()
+      disposeShaderMaterial(this.objectImage.material as THREE.ShaderMaterial)
       this.objectImage = null
     }
     this.objectImageId = objectId
     if (!objectId || !bytes || bytes.byteLength === 0) return
 
-    const { texture } = loadJpegTexture(bytes)
+    const texture = loadJpegTexture(bytes)
     texture.colorSpace = THREE.SRGBColorSpace
 
     const material = new THREE.ShaderMaterial({
@@ -1978,18 +1977,32 @@ export class SkyRenderer {
 }
 
 /**
+ * Releases a material and every texture it holds.
+ *
+ * `Material.dispose()` frees the program but not the textures referenced by its
+ * uniforms, so cycling through survey cutouts would leak a 512x512 texture each time.
+ */
+function disposeShaderMaterial(material: THREE.ShaderMaterial): void {
+  for (const uniform of Object.values(material.uniforms ?? {})) {
+    const value = uniform?.value
+    if (value instanceof THREE.Texture) value.dispose()
+  }
+  material.dispose()
+}
+
+/**
  * Turns raw JPEG bytes into a texture via a blob URL, which keeps `img-src` in the
  * Content Security Policy limited to `blob:` rather than opening it up to the
  * filesystem. The URL is revoked as soon as the decode completes.
  */
-function loadJpegTexture(bytes: Uint8Array): { texture: THREE.Texture; release: () => void } {
+function loadJpegTexture(bytes: Uint8Array): THREE.Texture {
   // Copy into a plain ArrayBuffer: the transferred view may sit inside a larger buffer.
   const copy = new Uint8Array(bytes.byteLength)
   copy.set(bytes)
   const url = URL.createObjectURL(new Blob([copy.buffer], { type: 'image/jpeg' }))
   const release = (): void => URL.revokeObjectURL(url)
-  const texture = new THREE.TextureLoader().load(url, release, undefined, release)
-  return { texture, release }
+  // Revoke on success and on failure alike, so a bad image does not leak the URL.
+  return new THREE.TextureLoader().load(url, release, undefined, release)
 }
 
 /** Labels are suppressed under the layer chips that run along the top of the map. */
