@@ -143,10 +143,12 @@ build each platform's installer on that platform, or in CI, so the binding match
 npm test
 ```
 
-141 tests covering the astronomy (coordinate transforms checked against
+163 tests covering the astronomy (coordinate transforms checked against
 astronomy-engine's own routines, rise/set/transit against known geometry, eclipse and
-meteor-shower dates against published values, SGP4 against real ISS elements) and the UI
-(search, Time Machine, onboarding, the details panel, accessibility roles).
+meteor-shower dates against published values, SGP4 against real ISS elements), the sky
+map's geometry (the galactic rotation against Sagittarius A* and the north galactic
+pole, and survey-cutout placement and orientation), the Content Security Policy, and the
+UI (search, Time Machine, onboarding, the details panel, accessibility roles).
 
 ```bash
 npm run typecheck

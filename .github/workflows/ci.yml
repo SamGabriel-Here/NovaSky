@@ -71,16 +71,18 @@ jobs:
 
       # A renderer that throws while loading leaves a blank window and nothing in the
       # logs, so "does it actually come up" needs its own check. There is no GPU on a
-      # CI runner, hence xvfb and software WebGL.
+      # CI runner, hence xvfb and software WebGL, and Chromium's SUID sandbox helper is
+      # not root-owned in the runner image, hence --no-sandbox. Both are CI-only flags:
+      # the app itself is unchanged, and a real build keeps the sandbox.
       - name: Smoke test
-        run: xvfb-run -a npx electron scripts/smoke.cjs
+        run: xvfb-run -a npx electron --no-sandbox scripts/smoke.cjs
         env:
           ELECTRON_DISABLE_SECURITY_WARNINGS: 1
           NOVASKY_SOFTWARE_GL: 1
 
       # NovaSky's central promise is that it works with no network at all.
       - name: Offline check
-        run: xvfb-run -a npx electron scripts/offline-check.cjs
+        run: xvfb-run -a npx electron --no-sandbox scripts/offline-check.cjs
         env:
           ELECTRON_DISABLE_SECURITY_WARNINGS: 1
           NOVASKY_SOFTWARE_GL: 1
