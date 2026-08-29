@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  /* Focus ring visible against the dark background, for keyboard users. */
+  :focus-visible {
+    outline: 2px solid theme('colors.nova.400');
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme('colors.space.600');
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-space-700/70 bg-space-850/80 backdrop-blur-md;
+  }
+
+  .panel-heading {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-slate-400;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium
+           transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40;
+  }
+
+  .btn-primary {
+    @apply btn bg-nova-500 text-white hover:bg-nova-400;
+  }
+
+  .btn-ghost {
+    @apply btn border border-space-600/80 bg-space-800/60 text-slate-200 hover:bg-space-700/70;
+  }
+
+  .field {
+    @apply w-full rounded-lg border border-space-600 bg-space-900/80 px-3 py-2 text-sm
+           text-slate-100 placeholder:text-slate-500 focus:border-nova-500 focus:outline-none;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-space-600 bg-space-800/70
+           px-2.5 py-1 text-xs text-slate-300;
+  }
+}
+
+/* Sky-map label overlay. Managed imperatively by SkyRenderer, so the styles live here
+   rather than in a component. */
+.sky-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 6px rgb(4 6 15 / 90%), 0 0 2px rgb(4 6 15);
+  will-change: transform;
+}
+.sky-label--star { color: #dce8ff; }
+.sky-label--constellation {
+  color: #8fb4ff;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  opacity: 0.8;
+}
+.sky-label--planet { color: #ffd9a0; font-weight: 600; }
+.sky-label--deep-sky { color: #9fe8d0; }
+.sky-label--satellite { color: #ff9de2; }
+.sky-label--cardinal {
+  color: #b9c6e4;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.sky-label--black-hole {
+  color: #ffb27a;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}

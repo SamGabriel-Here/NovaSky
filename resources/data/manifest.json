@@ -1,0 +1,23 @@
+{
+  "generatedAt": "2026-08-28T20:27:41.350Z",
+  "starMagnitudeLimit": 6.5,
+  "faintStarMagnitudeLimit": 9,
+  "dsoMagnitudeLimit": 11.5,
+  "counts": {
+    "stars": 8920,
+    "faintStars": 74559,
+    "constellations": 88,
+    "deepSky": 1314,
+    "blackHoles": 17,
+    "places": 418
+  },
+  "sources": {
+    "hyg": "https://raw.githubusercontent.com/astronexus/HYG-Database/main/hyg/CURRENT/hygdata_v41.csv",
+    "conLines": "https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.lines.json",
+    "conNames": "https://raw.githubusercontent.com/ofrohn/d3-celestial/master/data/constellations.json",
+    "ngc": "https://raw.githubusercontent.com/mattiaverga/OpenNGC/master/database_files/NGC.csv",
+    "ngcAddendum": "https://raw.githubusercontent.com/mattiaverga/OpenNGC/master/database_files/addendum.csv",
+    "tzMeta": "https://raw.githubusercontent.com/moment/moment-timezone/develop/data/meta/latest.json",
+    "simbadTap": "https://simbad.cds.unistra.fr/simbad/sim-tap/sync"
+  }
+}

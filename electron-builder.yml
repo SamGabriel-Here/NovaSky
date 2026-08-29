@@ -1,0 +1,22 @@
+appId: dev.novasky.app
+productName: NovaSky
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+extraResources:
+  # Offline star / constellation / deep-sky / place catalogues.
+  - from: resources/data
+    to: data
+    filter: ['**/*.json']
+mac:
+  category: public.app-category.education
+  target: [dmg, zip]
+win:
+  target: [nsis, portable]
+linux:
+  target: [AppImage, deb]
+  category: Education
+npmRebuild: true
