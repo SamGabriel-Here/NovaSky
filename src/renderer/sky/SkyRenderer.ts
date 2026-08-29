@@ -826,6 +826,7 @@ export class SkyRenderer {
 
     this.stars = new THREE.Points(geometry, material)
     this.stars.frustumCulled = false
+    this.stars.renderOrder = 1
     this.skyGroup.add(this.stars)
   }
 
@@ -916,8 +917,10 @@ export class SkyRenderer {
       material
     )
     this.objectImage.frustumCulled = false
-    // Above the panorama and the nebula glows, below the star points and markers.
-    this.objectImage.renderOrder = -3
+    // Above the panorama and above the computed glow of the same object — the
+    // photograph replaces that glow rather than competing with it — but below the star
+    // points and markers, which stay readable on top.
+    this.objectImage.renderOrder = 0
     this.objectImage.visible = this.options.showObjectImagery
     this.skyGroup.add(this.objectImage)
   }
@@ -1306,6 +1309,7 @@ export class SkyRenderer {
     })
     this.deepSkyPoints = new THREE.Points(geometry, material)
     this.deepSkyPoints.frustumCulled = false
+    this.deepSkyPoints.renderOrder = 1
     this.deepSkyPoints.visible = this.options.showDeepSky
     this.skyGroup.add(this.deepSkyPoints)
   }
@@ -1444,6 +1448,7 @@ export class SkyRenderer {
     })
     this.satellitePoints = new THREE.Points(geometry, material)
     this.satellitePoints.frustumCulled = false
+    this.satellitePoints.renderOrder = 1
     this.satellitePoints.visible = this.options.showSatellites
     this.worldGroup.add(this.satellitePoints)
     this.refreshLabels()

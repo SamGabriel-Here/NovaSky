@@ -12,10 +12,25 @@ import { useAppStore, useEffectiveSettings } from '../state/useAppStore'
 import { Icon } from '../components/Icon'
 import { Tooltip } from '../components/ui'
 
-/** Below this field of view a selected deep-sky object is worth a real survey image. */
+/** Below this field of view a selected object is worth a real survey image. */
 const OBJECT_IMAGERY_FOV = 6
 
-const roundToStep = (value: number, step: number): number => Math.round(value / step) * step
+/**
+ * Cutouts are requested at one of a few fixed sizes rather than at whatever the field
+ * of view happens to be. Two reasons: zooming reuses an already-cached image instead of
+ * downloading a slightly different one at every step, and the local cache cannot grow
+ * without bound as someone explores.
+ */
+const CUTOUT_SIZES: number[] = [0.25, 0.5, 1, 2, 4]
+
+function cutoutSizeFor(fov: number): number {
+  const wanted = fov * 0.8
+  let best = CUTOUT_SIZES[0]
+  for (const size of CUTOUT_SIZES) {
+    if (Math.abs(size - wanted) < Math.abs(best - wanted)) best = size
+  }
+  return best
+}
 
 /** Decodes the base64 JPEG the main process sends back. */
 function base64ToBytes(encoded: string): Uint8Array {
@@ -157,8 +172,12 @@ export function SkyCanvas(): JSX.Element {
       return
     }
     const object = catalog.objects.get(selectedId)
-    // Only fixed, extended objects are worth a cutout; planets move and stars are points.
-    if (!object || object.kind !== 'deep-sky' || object.ra === null || object.dec === null) {
+    // Fixed objects only. Planets and satellites move, so a survey plate would show
+    // empty sky where they are now; a single star is a point and gains nothing.
+    // Black holes qualify, and are worth it: the cutout shows the real field, which is
+    // the clearest way to make the point that there is nothing there to see.
+    const eligible = object?.kind === 'deep-sky' || object?.kind === 'black-hole'
+    if (!object || !eligible || object.ra === null || object.dec === null) {
       rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
       setImageryNote(null)
       return
@@ -169,8 +188,7 @@ export function SkyCanvas(): JSX.Element {
       return
     }
 
-    // Quantise the requested field so small zoom changes reuse the same cached cutout.
-    const size = Math.min(OBJECT_IMAGERY_FOV, Math.max(0.15, roundToStep(camera.fov * 0.8, 0.25)))
+    const size = cutoutSizeFor(camera.fov)
     let cancelled = false
     const timer = setTimeout(() => {
       void window.novasky

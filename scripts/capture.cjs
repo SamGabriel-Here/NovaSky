@@ -203,7 +203,8 @@ app.whenReady().then(async () => {
     })()
   `)
   await wait(3000)
-  for (let i = 0; i < 5; i++) {
+  // Zoom well past the 6-degree threshold at which survey cutouts are requested.
+  for (let i = 0; i < 11; i++) {
     win.webContents.sendInputEvent({ type: 'keyDown', keyCode: '+' })
     win.webContents.sendInputEvent({ type: 'keyUp', keyCode: '+' })
     await wait(150)
