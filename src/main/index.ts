@@ -14,6 +14,14 @@ import { buildContentSecurityPolicy } from '../shared/csp'
 
 const isDev = !app.isPackaged
 
+// CI runners have no GPU. Falling back to software rendering lets the smoke and offline
+// checks exercise the real WebGL sky map instead of skipping it.
+if (process.env.NOVASKY_SOFTWARE_GL === '1') {
+  app.commandLine.appendSwitch('use-gl', 'swiftshader')
+  app.commandLine.appendSwitch('use-angle', 'swiftshader')
+  app.commandLine.appendSwitch('enable-unsafe-swiftshader')
+}
+
 let mainWindow: BrowserWindow | null = null
 let store: Store | null = null
 const scheduler = new NotificationScheduler()

@@ -51,3 +51,36 @@ jobs:
       # better-sqlite3 binding, without spending the time to make installers.
       - name: Build
         run: npm run build
+
+  runtime:
+    name: Boot the built app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # A renderer that throws while loading leaves a blank window and nothing in the
+      # logs, so "does it actually come up" needs its own check. There is no GPU on a
+      # CI runner, hence xvfb and software WebGL.
+      - name: Smoke test
+        run: xvfb-run -a npx electron scripts/smoke.cjs
+        env:
+          ELECTRON_DISABLE_SECURITY_WARNINGS: 1
+          NOVASKY_SOFTWARE_GL: 1
+
+      # NovaSky's central promise is that it works with no network at all.
+      - name: Offline check
+        run: xvfb-run -a npx electron scripts/offline-check.cjs
+        env:
+          ELECTRON_DISABLE_SECURITY_WARNINGS: 1
+          NOVASKY_SOFTWARE_GL: 1

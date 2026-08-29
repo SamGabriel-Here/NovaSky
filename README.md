@@ -152,6 +152,14 @@ meteor-shower dates against published values, SGP4 against real ISS elements) an
 npm run typecheck
 ```
 
+```bash
+npm run offline
+```
+
+Boots the built app with every outbound request refused and asserts the sky map still
+renders. NovaSky's central promise is that it works with no network, so that promise has
+its own check. It reports the number of attempted requests; the expected answer is zero.
+
 ## Keyboard shortcuts
 
 | Key | Action |

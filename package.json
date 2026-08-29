@@ -23,7 +23,8 @@
     "pack:linux": "npm run build && electron-builder --linux --config electron-builder.yml",
     "smoke": "electron-vite build && electron scripts/smoke.cjs",
     "capture": "electron-vite build --mode development && electron scripts/capture.cjs",
-    "icon": "electron scripts/make-icon.cjs"
+    "icon": "electron scripts/make-icon.cjs",
+    "offline": "electron-vite build && electron scripts/offline-check.cjs"
   },
   "dependencies": {
     "astronomy-engine": "^2.1.19",
