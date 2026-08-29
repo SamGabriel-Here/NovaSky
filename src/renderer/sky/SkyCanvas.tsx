@@ -313,7 +313,11 @@ export function SkyCanvas(): JSX.Element {
       <div ref={overlayRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />
 
       {imageryNote && (
-        <div className="pointer-events-none absolute bottom-3 left-1/2 max-w-[60%] -translate-x-1/2 truncate rounded-lg border border-space-700/70 bg-space-950/80 px-3 py-1.5 text-[11px] text-slate-300 backdrop-blur">
+        <div
+          className={`pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate rounded-lg border border-space-700/70 bg-space-950/80 px-3 py-1.5 text-[11px] text-slate-300 backdrop-blur transition-[bottom] duration-200 ${
+            timeMachineOpen ? 'bottom-[10.5rem]' : 'bottom-3'
+          }`}
+        >
           {imageryNote}
         </div>
       )}
