@@ -45,6 +45,9 @@ export function loadCatalog(): CatalogPayload {
       `Missing catalogue files in ${directory}: ${missing.join(', ')}. Run "npm run data:build" to download them.`
     )
   }
+  // Logged once at startup: in a packaged build this is the only way to confirm the
+  // catalogues were found at process.resourcesPath rather than falling back.
+  console.log(`[novasky] loading catalogues from ${directory}`)
   cached = {
     stars: readFileSync(path.join(directory, FILES.stars), 'utf8'),
     faintStars: readFileSync(path.join(directory, FILES.faintStars), 'utf8'),
@@ -54,5 +57,10 @@ export function loadCatalog(): CatalogPayload {
     places: readFileSync(path.join(directory, FILES.places), 'utf8'),
     manifest: readFileSync(path.join(directory, FILES.manifest), 'utf8')
   }
+  console.log(
+    `[novasky] catalogues ready (${(
+      Object.values(cached).reduce((total, text) => total + text.length, 0) / 1e6
+    ).toFixed(1)} MB)`
+  )
   return cached
 }
