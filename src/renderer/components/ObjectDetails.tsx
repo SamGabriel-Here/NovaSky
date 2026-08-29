@@ -135,7 +135,7 @@ export function ObjectDetails({ snapshot, onClose, onShowInSky, compact }: Props
         <h3 className="panel-heading mb-1">Tonight</h3>
         <dl className="mb-4">
           {riseSet.circumpolar ? (
-            <DataRow label="Rise / set" value="Circumpolar — never sets from here" />
+            <DataRow label="Rise / set" value="Circumpolar, never sets from here" />
           ) : riseSet.neverRises ? (
             <DataRow label="Rise / set" value="Never rises from your location" />
           ) : (

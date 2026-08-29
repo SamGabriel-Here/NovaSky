@@ -2,7 +2,7 @@
  * Location entry.
  *
  * NovaSky never asks the operating system for GPS. The starting guess comes from the
- * system time zone — which the app already knows — and the user can search a bundled
+ * system time zone, which the app already knows, and the user can search a bundled
  * list of time-zone reference cities or type coordinates directly. The chosen location
  * is stored locally and never leaves the machine.
  */

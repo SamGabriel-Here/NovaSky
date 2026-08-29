@@ -3,7 +3,7 @@
  *
  * Boots the built app with every outbound request refused, then asserts the catalogues
  * loaded, the sky map rendered and labels were placed. It also reports how many requests
- * were attempted — the expected answer is zero, because catalogues arrive over IPC and
+ * were attempted. The expected answer is zero, because catalogues arrive over IPC and
  * the renderer never talks to the network itself.
  *
  *   npm run build && npx electron scripts/offline-check.cjs

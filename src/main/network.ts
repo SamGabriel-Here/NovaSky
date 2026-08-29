@@ -1,8 +1,8 @@
 /**
  * The only part of NovaSky that touches the network.
  *
- * Satellite positions are the one thing that genuinely cannot be computed offline —
- * orbital elements decay and have to be refreshed. Everything else in the app works
+ * Satellite positions are the one thing that genuinely cannot be computed offline,
+ * because orbital elements decay and have to be refreshed. Everything else in the app works
  * from the bundled catalogues. Fetching is skipped entirely when the user turns
  * `allowNetwork` off in Settings.
  */

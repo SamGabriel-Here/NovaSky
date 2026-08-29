@@ -1,8 +1,8 @@
 /**
  * Global search overlay (press S).
  *
- * Searches the whole local catalogue — stars, constellations, planets, the Moon,
- * Messier and NGC objects — with no network involved.
+ * Searches the whole local catalogue: stars, constellations, planets, the Moon, and
+ * Messier and NGC objects. No network involved.
  */
 import { useEffect, useMemo, useRef, useState, type JSX } from 'react'
 import type { ObjectKind, SkyObject } from '@shared/types'

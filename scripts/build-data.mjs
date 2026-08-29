@@ -49,7 +49,7 @@ const SOURCES = {
 const STAR_MAG_LIMIT = 6.5
 /**
  * Second, lighter catalogue of telescopic stars. These are never labelled, searched or
- * clicked — they exist so that the Milky Way appears in the sky map as what it actually
+ * clicked. They exist so the Milky Way appears in the sky map as what it actually
  * is: the combined glow of tens of thousands of real stars along the galactic plane.
  */
 const FAINT_STAR_MAG_LIMIT = 9.0
@@ -298,7 +298,7 @@ async function buildDeepSky() {
       angle: r(num(f[col.PosAng]), 1) // position angle of the major axis, degrees
     })
   }
-  // Messier objects first, then by brightness — keeps the search list sensible.
+  // Messier objects first, then by brightness, which keeps the search list sensible.
   out.sort((a, b) => {
     if ((a.m === null) !== (b.m === null)) return a.m === null ? 1 : -1
     if (a.m !== null && b.m !== null) return a.m - b.m
@@ -332,7 +332,7 @@ async function buildSkyImage() {
 // --------------------------------------------------------- black holes
 
 /**
- * Black holes are not a catalogue you can download whole — the confirmed ones are a
+ * Black holes are not a catalogue you can download whole. The confirmed ones are a
  * short, well-studied list. NovaSky ships that list, with every position and magnitude
  * queried from SIMBAD at build time so no coordinate is ever hand-entered.
  *
@@ -432,7 +432,7 @@ async function buildBlackHoles() {
       k: Astronomy.Constellation(raHours, row.dec).symbol,
       r: r(raHours, 5),
       d: r(row.dec, 5),
-      // Optical magnitude of the *system* — a black hole itself emits no light.
+      // Optical magnitude of the *system*, since a black hole itself emits no light.
       v: r(row.v, 2)
     })
   }

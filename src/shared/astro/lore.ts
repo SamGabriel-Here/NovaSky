@@ -1,16 +1,16 @@
 /**
  * Cultural background and plain-language descriptions.
  *
- * This file holds *editorial* text only — history, mythology and beginner-facing
+ * This file holds *editorial* text only: history, mythology and beginner-facing
  * explanations. Every numeric or positional value in NovaSky comes from a catalogue
  * or from astronomy-engine, never from here.
  *
  * Attribution conventions used below:
- *  - "Ptolemy" — one of the 48 constellations listed in the Almagest (2nd century CE).
- *  - "Keyser & de Houtman" — charted on the 1595-97 Dutch voyage, published by
+ *  - "Ptolemy": one of the 48 constellations listed in the Almagest (2nd century CE).
+ *  - "Keyser & de Houtman": charted on the 1595-97 Dutch voyage, published by
  *    Plancius (1598) and popularised by Bayer's Uranometria (1603).
- *  - "Lacaille" — introduced by Nicolas-Louis de Lacaille from his 1751-52 Cape survey.
- *  - "Hevelius" — introduced by Johannes Hevelius, published 1687/1690.
+ *  - "Lacaille": introduced by Nicolas-Louis de Lacaille from his 1751-52 Cape survey.
+ *  - "Hevelius": introduced by Johannes Hevelius, published 1687/1690.
  */
 
 export interface ConstellationLore {
@@ -37,7 +37,7 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   },
   Ant: {
     summary: 'A faint southern group with no bright stars, representing an air pump.',
-    mythology: 'Lacaille, named for the air pump of the physicist Denis Papin — one of fourteen constellations he devoted to instruments of science and craft.'
+    mythology: 'Lacaille, named for the air pump of the physicist Denis Papin, one of fourteen constellations he devoted to instruments of science and craft.'
   },
   Aps: {
     summary: 'A small, faint constellation near the south celestial pole.',
@@ -48,7 +48,7 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
     mythology: 'Ptolemy. Associated with Ganymede, the youth carried to Olympus by Zeus to serve as cupbearer to the gods. The region of sky around it holds several watery constellations.'
   },
   Aql: {
-    summary: 'The eagle, marked by bright Altair flanked by two fainter stars — one corner of the Summer Triangle.',
+    summary: 'The eagle, marked by bright Altair flanked by two fainter stars, one corner of the Summer Triangle.',
     mythology: 'Ptolemy. The eagle of Zeus, which carried his thunderbolts and, in some versions, bore Ganymede up to Olympus.',
     findIt: 'Altair is the southernmost star of the Summer Triangle, and the only bright star with a companion close on each side.'
   },
@@ -62,13 +62,13 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   },
   Aur: {
     summary: 'A bright pentagon high in northern winter skies, anchored by the star Capella.',
-    mythology: 'Ptolemy. Usually identified as a charioteer, often Erichthonius of Athens, credited with inventing the four-horse chariot. He is drawn carrying a goat and her kids — the stars around Capella, whose name means "little she-goat".',
+    mythology: 'Ptolemy. Usually identified as a charioteer, often Erichthonius of Athens, credited with inventing the four-horse chariot. He is drawn carrying a goat and her kids, the stars around Capella, whose name means "little she-goat".',
     findIt: 'Capella is the bright yellow star high overhead on winter evenings, north of Orion.'
   },
   Boo: {
     summary: 'A kite-shaped figure rising from the orange giant Arcturus.',
     mythology: 'Ptolemy. The herdsman or ploughman who drives the bears around the pole. The name Arcturus means "guardian of the bear".',
-    findIt: 'Follow the curve of the Big Dipper’s handle away from the bowl — "arc to Arcturus".'
+    findIt: 'Follow the curve of the Big Dipper’s handle away from the bowl. The old mnemonic is "arc to Arcturus".'
   },
   Cae: { summary: 'One of the faintest constellations, a thin wedge of southern sky.', mythology: 'Lacaille, representing a burin or engraving chisel.' },
   Cam: { summary: 'A large but very dim northern constellation filling the gap between Perseus, Auriga and the pole.', mythology: 'Introduced by Petrus Plancius in 1612 to fill an empty stretch of northern sky. The name means "giraffe".' },
@@ -83,7 +83,7 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
     findIt: 'Follow Orion’s belt down and to the left; the first brilliant star you meet is Sirius.'
   },
   CMi: { summary: 'A two-star constellation dominated by Procyon.', mythology: 'Ptolemy. Orion’s smaller hunting dog. Procyon means "before the dog", because it rises shortly before Sirius from northern latitudes.' },
-  Cap: { summary: 'A wide triangle of faint stars in the autumn zodiac.', mythology: 'Ptolemy. A sea-goat — goat in front, fish behind — a hybrid inherited from Babylonian astronomy and linked in Greek myth to the god Pan.' },
+  Cap: { summary: 'A wide triangle of faint stars in the autumn zodiac.', mythology: 'Ptolemy. A sea-goat, goat in front and fish behind, a hybrid inherited from Babylonian astronomy and linked in Greek myth to the god Pan.' },
   Car: {
     summary: 'A rich southern constellation containing Canopus, the second-brightest star, and the vast Carina Nebula.',
     mythology: 'Formed when Lacaille divided the unwieldy ancient constellation Argo Navis, the ship of the Argonauts, into Carina (the keel), Puppis (the stern) and Vela (the sails).'
@@ -98,11 +98,11 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   Cet: { summary: 'A sprawling constellation of the "water" region, home to Mira, a red giant that fades and brightens over about eleven months.', mythology: 'Ptolemy. The sea monster sent to devour Andromeda, killed by Perseus.' },
   Cha: { summary: 'A small, dim southern constellation near the celestial south pole.', mythology: 'Keyser & de Houtman, named after the chameleon.' },
   Cir: { summary: 'A narrow triangle of faint stars beside Alpha Centauri.', mythology: 'Lacaille, representing a draughtsman’s pair of compasses.' },
-  Col: { summary: 'A small southern group below Canis Major.', mythology: 'Introduced by Petrus Plancius in 1592. The dove — associated both with Noah’s dove and with the dove sent ahead of the Argo.' },
+  Col: { summary: 'A small southern group below Canis Major.', mythology: 'Introduced by Petrus Plancius in 1592. The dove, associated both with Noah’s dove and with the dove sent ahead of the Argo.' },
   Com: { summary: 'A faint scatter of stars that is actually a nearby star cluster, and a window onto thousands of distant galaxies.', mythology: 'Named for Queen Berenice II of Egypt, who cut off her hair as an offering for her husband’s safe return from war; when it vanished from the temple, the court astronomer declared it had been placed among the stars. Formalised as a constellation by Tycho Brahe.' },
   CrA: { summary: 'A delicate arc of stars beneath Sagittarius.', mythology: 'Ptolemy. The southern crown, sometimes a wreath laid at the feet of the neighbouring centaur.' },
   CrB: { summary: 'A near-perfect semicircle of stars between Boötes and Hercules.', mythology: 'Ptolemy. The crown given to Ariadne by Dionysus and thrown into the sky.', findIt: 'A small, neat arc just east of bright Arcturus.' },
-  Crv: { summary: 'A compact quadrilateral in the southern spring sky.', mythology: 'Ptolemy. The crow sent by Apollo to fetch water, which dallied and returned with excuses — and with the water snake Hydra and the cup Crater, both of which sit beside it in the sky.' },
+  Crv: { summary: 'A compact quadrilateral in the southern spring sky.', mythology: 'Ptolemy. The crow sent by Apollo to fetch water, which dallied and returned with excuses, and with the water snake Hydra and the cup Crater, both of which sit beside it in the sky.' },
   Crt: { summary: 'A faint cup-shaped group riding on the back of Hydra.', mythology: 'Ptolemy. The goblet of Apollo, part of the same story as Corvus.' },
   Cru: {
     summary: 'The smallest constellation and the most famous southern signpost, with the dark Coalsack Nebula alongside.',
@@ -111,7 +111,7 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   },
   Cyg: {
     summary: 'The Northern Cross, flying down the Milky Way, with brilliant Deneb at its tail.',
-    mythology: 'Ptolemy. A swan — in one telling the form Zeus took to approach Leda; in another, the grieving Cycnus, transformed as he dived repeatedly into the river for his friend Phaethon.',
+    mythology: 'Ptolemy. A swan. In one telling it is the form Zeus took to approach Leda. In another it is the grieving Cycnus, transformed as he dived repeatedly into the river for his friend Phaethon.',
     findIt: 'Deneb marks the top of the Summer Triangle; the cross runs along the Milky Way beneath it.'
   },
   Del: { summary: 'A tiny, charming diamond of stars with a tail, east of Altair.', mythology: 'Ptolemy. The dolphin that rescued the poet Arion from drowning, or that persuaded the sea-nymph Amphitrite to marry Poseidon.' },
@@ -125,9 +125,9 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
     mythology: 'Ptolemy. The Dioscuri: mortal Castor and immortal Pollux, who asked to share immortality so they need never be parted.',
     findIt: 'Two bright stars of similar brightness, up and to the left of Orion on winter evenings.'
   },
-  Gru: { summary: 'A bright southern constellation south of Piscis Austrinus.', mythology: 'Keyser & de Houtman. The crane — a bird the Dutch navigators would have known well from European wetlands.' },
+  Gru: { summary: 'A bright southern constellation south of Piscis Austrinus.', mythology: 'Keyser & de Houtman. The crane, a bird the Dutch navigators would have known well from European wetlands.' },
   Her: { summary: 'A large northern constellation whose "Keystone" asterism points the way to M13, the finest globular cluster in northern skies.', mythology: 'Ptolemy, who called it simply "the kneeler". Later identified with Heracles, shown kneeling with one foot on Draco’s head.' },
-  Hor: { summary: 'A faint southern constellation.', mythology: 'Lacaille, representing a pendulum clock — an instrument central to the precise timing of his own star observations.' },
+  Hor: { summary: 'A faint southern constellation.', mythology: 'Lacaille, representing a pendulum clock, an instrument central to the precise timing of his own star observations.' },
   Hya: { summary: 'The largest of the 88 constellations, a long thin trail of faint stars with one moderately bright star, Alphard.', mythology: 'Ptolemy. The many-headed water snake fought by Heracles as his second labour.' },
   Hyi: { summary: 'A southern constellation between the two Magellanic Clouds.', mythology: 'Keyser & de Houtman. The "little water snake", distinct from the much larger and older Hydra.' },
   Ind: { summary: 'A faint southern constellation.', mythology: 'Keyser & de Houtman, depicting an indigenous man; the figure reflects the European voyaging context in which these constellations were invented rather than any specific culture.' },
@@ -147,17 +147,17 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
     mythology: 'Ptolemy. The lyre of Orpheus, whose music could move stones and persuade the lord of the underworld.',
     findIt: 'Vega is the brightest star of the Summer Triangle, nearly overhead on summer evenings from mid-northern latitudes.'
   },
-  Men: { summary: 'A faint constellation near the south celestial pole, overlapping part of the Large Magellanic Cloud.', mythology: 'Lacaille, named for Table Mountain overlooking Cape Town, where he made his southern survey — the only constellation named after a terrestrial landmark.' },
+  Men: { summary: 'A faint constellation near the south celestial pole, overlapping part of the Large Magellanic Cloud.', mythology: 'Lacaille, named for Table Mountain overlooking Cape Town, where he made his southern survey. It is the only constellation named after a terrestrial landmark.' },
   Mic: { summary: 'A faint constellation south of Capricornus.', mythology: 'Lacaille, representing a microscope.' },
   Mon: { summary: 'A dim constellation inside the Winter Triangle, but rich in nebulae and clusters where the Milky Way crosses it.', mythology: 'Attributed to Petrus Plancius, 1612. The unicorn.' },
-  Mus: { summary: 'A small southern constellation just below Crux.', mythology: 'Keyser & de Houtman. The fly — the only insect among the 88 constellations.' },
+  Mus: { summary: 'A small southern constellation just below Crux.', mythology: 'Keyser & de Houtman. The fly, the only insect among the 88 constellations.' },
   Nor: { summary: 'A faint southern constellation whose brightest stars were reassigned to neighbouring Scorpius.', mythology: 'Lacaille, representing a carpenter’s set square and rule.' },
   Oct: { summary: 'The constellation containing the south celestial pole. It has no bright pole star; faint Sigma Octantis is the closest equivalent to Polaris.', mythology: 'Lacaille, named for the octant, a navigational instrument for measuring altitude at sea.' },
-  Oph: { summary: 'A large equatorial constellation that the Sun passes through, though it is not one of the traditional twelve zodiac signs.', mythology: 'Ptolemy. Asclepius, the healer who learned to raise the dead and was struck down by Zeus for it — shown grappling with the serpent that is the separate constellation Serpens.' },
+  Oph: { summary: 'A large equatorial constellation that the Sun passes through, though it is not one of the traditional twelve zodiac signs.', mythology: 'Ptolemy. Asclepius, the healer who learned to raise the dead and was struck down by Zeus for it, and shown grappling with the serpent that is the separate constellation Serpens.' },
   Ori: {
     summary: 'The most recognisable constellation in the sky: three belt stars in a row, red Betelgeuse and blue-white Rigel at the corners, and the Orion Nebula hanging from the belt.',
-    mythology: 'Ptolemy. The great hunter, killed by a scorpion — which is why Orion and Scorpius are placed on opposite sides of the sky and never appear together.',
-    findIt: 'Three equally bright stars in a short straight line — the belt — are unmistakable on winter evenings.'
+    mythology: 'Ptolemy. The great hunter, killed by a scorpion, which is why Orion and Scorpius are placed on opposite sides of the sky and never appear together.',
+    findIt: 'Three equally bright stars in a short straight line, the belt, are unmistakable on winter evenings.'
   },
   Pav: { summary: 'A southern constellation containing the bright globular cluster NGC 6752.', mythology: 'Keyser & de Houtman. The peacock, a bird sacred to Hera in Greek myth and encountered by the Dutch navigators in the East Indies.' },
   Peg: {
@@ -171,9 +171,9 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   Psc: { summary: 'A large, faint zodiac constellation. Its western fish is marked by the "Circlet" of stars below Pegasus.', mythology: 'Ptolemy. Aphrodite and Eros transformed into fish, tied together by a cord, to escape the monster Typhon. The vernal equinox currently lies within its borders.' },
   PsA: { summary: 'A small constellation whose one bright star, Fomalhaut, stands alone in an otherwise empty stretch of autumn sky.', mythology: 'Ptolemy. The "southern fish", shown drinking the stream poured from the water jar of Aquarius.' },
   Pup: { summary: 'A bright section of the southern Milky Way, thick with open clusters.', mythology: 'The stern of Argo Navis, separated out by Lacaille.' },
-  Pyx: { summary: 'A small faint constellation beside Puppis.', mythology: 'Lacaille, representing a mariner’s compass — a nautical instrument placed near the dismembered ship Argo.' },
+  Pyx: { summary: 'A small faint constellation beside Puppis.', mythology: 'Lacaille, representing a mariner’s compass, a nautical instrument placed near the dismembered ship Argo.' },
   Ret: { summary: 'A small southern constellation near the Large Magellanic Cloud.', mythology: 'Lacaille, named for the reticle, the eyepiece grid he used to measure star positions.' },
-  Sge: { summary: 'The third-smallest constellation, a small but genuinely arrow-shaped group in the Milky Way.', mythology: 'Ptolemy. An arrow — variously the one Heracles used to kill the eagle tormenting Prometheus, or a shaft of Eros.' },
+  Sge: { summary: 'The third-smallest constellation, a small but genuinely arrow-shaped group in the Milky Way.', mythology: 'Ptolemy. An arrow, variously the one Heracles used to kill the eagle tormenting Prometheus, or a shaft of Eros.' },
   Sgr: {
     summary: 'Contains the "Teapot" asterism and the direction of the centre of our galaxy, making it the richest region of the Milky Way.',
     mythology: 'Ptolemy. An archer centaur, drawn from a Babylonian figure, with his bow aimed at the heart of Scorpius.',
@@ -181,15 +181,15 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
   },
   Sco: {
     summary: 'A genuinely scorpion-shaped constellation with red supergiant Antares at its heart and a curling tail of bright stars.',
-    mythology: 'Ptolemy. The scorpion that killed Orion. Antares means "rival of Ares" — a red star as fierce-looking as the planet Mars.'
+    mythology: 'Ptolemy. The scorpion that killed Orion. Antares means "rival of Ares", a red star as fierce-looking as the planet Mars.'
   },
   Scl: { summary: 'A faint constellation containing the south galactic pole, so it offers a clear view out of our galaxy.', mythology: 'Lacaille, representing a sculptor’s studio.' },
-  Sct: { summary: 'A small but bright Milky Way constellation containing the Wild Duck Cluster.', mythology: 'Hevelius, who named it for the coat of arms of King John III Sobieski of Poland after his victory at Vienna in 1683 — one of the few constellations honouring a historical event.' },
+  Sct: { summary: 'A small but bright Milky Way constellation containing the Wild Duck Cluster.', mythology: 'Hevelius, who named it for the coat of arms of King John III Sobieski of Poland after his victory at Vienna in 1683, one of the few constellations honouring a historical event.' },
   Ser: { summary: 'The only constellation split into two separate pieces: Serpens Caput (the head) and Serpens Cauda (the tail), on either side of Ophiuchus.', mythology: 'Ptolemy. The serpent held by the healer Asclepius; the snake shedding its skin symbolised renewal and healing.' },
   Sex: { summary: 'A very faint constellation on the celestial equator below Leo.', mythology: 'Hevelius, commemorating the large sextant he used for measuring star positions, destroyed in a fire at his observatory in 1679.' },
   Tau: {
     summary: 'Contains two of the finest naked-eye star clusters, the Pleiades and the Hyades, plus orange Aldebaran and the Crab Nebula.',
-    mythology: 'Ptolemy, though the bull is far older — it appears in Babylonian records and is among the oldest identified constellations. Zeus took the form of a white bull to carry Europa across the sea.',
+    mythology: 'Ptolemy, though the bull is far older. It appears in Babylonian records and is among the oldest identified constellations. Zeus took the form of a white bull to carry Europa across the sea.',
     findIt: 'Follow Orion’s belt up and to the right to reach orange Aldebaran; the fuzzy knot of stars beyond it is the Pleiades.'
   },
   Tel: { summary: 'A faint southern constellation below Sagittarius.', mythology: 'Lacaille, representing an aerial telescope of the kind used in the 17th century.' },
@@ -202,18 +202,18 @@ export const CONSTELLATION_LORE: Record<string, ConstellationLore> = {
     findIt: 'Seven bright stars forming a saucepan. The two stars at the end of the bowl point straight at Polaris.'
   },
   UMi: {
-    summary: 'The Little Dipper, with Polaris — the North Star — at the end of its handle.',
+    summary: 'The Little Dipper, with Polaris, the North Star, at the end of its handle.',
     mythology: 'Ptolemy. Usually Arcas, son of Callisto, placed in the sky beside his transformed mother. Polaris sits within about a degree of the north celestial pole today, but precession means it has not always been the pole star and will not remain so.',
     findIt: 'Use the two "pointer" stars at the end of the Big Dipper’s bowl; they lead straight to Polaris.'
   },
   Vel: { summary: 'A bright southern Milky Way constellation containing the Vela supernova remnant and the Eight-Burst Nebula.', mythology: 'The sails of Argo Navis, separated out by Lacaille.' },
-  Vir: { summary: 'The second-largest constellation, marked by bright Spica and containing the enormous Virgo Cluster of galaxies.', mythology: 'Ptolemy. A maiden associated with harvest and justice — variously Demeter, Persephone or Astraea. Spica means "ear of grain", the sheaf she holds.' },
+  Vir: { summary: 'The second-largest constellation, marked by bright Spica and containing the enormous Virgo Cluster of galaxies.', mythology: 'Ptolemy. A maiden associated with harvest and justice, variously Demeter, Persephone or Astraea. Spica means "ear of grain", the sheaf she holds.' },
   Vol: { summary: 'A small southern constellation next to the Large Magellanic Cloud.', mythology: 'Keyser & de Houtman. The flying fish, which the Dutch navigators saw leaping alongside their ships in tropical waters.' },
   Vul: { summary: 'A faint constellation inside the Summer Triangle, containing the Dumbbell Nebula.', mythology: 'Hevelius, who introduced it as "the little fox with the goose"; the goose was later dropped from the name.' }
 }
 
 /**
- * Beginner-facing notes for individual objects. Purely descriptive — brightness,
+ * Beginner-facing notes for individual objects. Purely descriptive: brightness,
  * distance and position always come from the catalogues and the ephemeris.
  */
 export const OBJECT_NOTES: Record<string, string> = {
@@ -223,25 +223,25 @@ export const OBJECT_NOTES: Record<string, string> = {
   Arcturus: 'An orange giant, and the brightest star in the northern celestial hemisphere. It is moving rapidly across the sky compared with most stars.',
   'Rigel Kentaurus': 'Part of the Alpha Centauri system, the closest star system to the Sun. What looks like a single star is a close pair, with the faint red dwarf Proxima Centauri orbiting further out.',
   Vega: 'A hot, fast-spinning white star that served as the original zero-point of the magnitude scale. It was the pole star around 12 000 BCE and will be again in roughly 13 000 years.',
-  Capella: 'Actually two pairs of stars — four in total. The bright pair are both yellow giants, giving Capella a colour much like the Sun’s.',
+  Capella: 'Actually two pairs of stars, four in total. The bright pair are both yellow giants, giving Capella a colour much like the Sun’s.',
   Rigel: 'A blue supergiant, and the brightest star in Orion despite carrying the "beta" designation. It is tens of thousands of times more luminous than the Sun.',
   Procyon: 'A nearby star with a white dwarf companion, forming the third corner of the Winter Triangle with Sirius and Betelgeuse.',
   Achernar: 'The flattened end of the river Eridanus. It spins so fast that it is markedly oblate rather than spherical.',
-  Betelgeuse: 'A red supergiant so large it would swallow the inner Solar System. Its brightness varies noticeably, and it is expected to end as a supernova — on an astronomical timescale, not a human one.',
+  Betelgeuse: 'A red supergiant so large it would swallow the inner Solar System. Its brightness varies noticeably, and it is expected to end as a supernova, though on an astronomical timescale rather than a human one.',
   Hadar: 'A hot blue giant that acts, with Alpha Centauri, as a pointer to the Southern Cross.',
   Altair: 'One of the fastest-rotating bright stars known, spinning so quickly that it is visibly flattened. It marks the southern corner of the Summer Triangle.',
   Aldebaran: 'An orange giant that appears to sit among the Hyades cluster but is actually much closer, lying in the same line of sight by chance.',
   Antares: 'A red supergiant at the heart of the Scorpion, comparable in size to Betelgeuse and similarly variable.',
   Spica: 'A close pair of hot blue stars orbiting every four days, so near to each other that their mutual gravity distorts them into egg shapes.',
   Pollux: 'The brighter of the twins, an orange giant with a confirmed planet in orbit.',
-  Fomalhaut: 'A young star surrounded by a prominent ring of dust and debris — one of the first such discs ever imaged directly.',
+  Fomalhaut: 'A young star surrounded by a prominent ring of dust and debris, one of the first such discs ever imaged directly.',
   Deneb: 'One of the most luminous stars visible to the naked eye. It appears no brighter than its neighbours only because it is far more distant.',
   Regulus: 'The "little king", lying almost exactly on the ecliptic, so the Moon and planets pass close to it regularly.',
   Castor: 'A remarkable system of six stars in three gravitationally bound pairs.',
   Polaris: 'The current North Star. It sits within about a degree of the north celestial pole, so it barely moves through the night while everything else wheels around it.',
   Mizar: 'The middle star of the Big Dipper’s handle. Its faint neighbour Alcor makes a classic naked-eye test of sharp vision, and Mizar itself was the first star discovered to be a telescopic double.',
   Algol: 'An eclipsing binary. Every 2.87 days one star passes in front of the other and the pair visibly dims for several hours.',
-  Alphard: 'The "solitary one" — an orange giant in an otherwise empty stretch of sky.',
+  Alphard: 'The "solitary one", an orange giant in an otherwise empty stretch of sky.',
   // --- deep sky (keyed on primary common name) ---
   'Andromeda Galaxy': 'The nearest large spiral galaxy and the most distant object visible to the unaided eye. It is approaching the Milky Way and the two will eventually merge.',
   'Orion Nebula': 'A vast star-forming region visible as the fuzzy middle "star" of Orion’s sword. Thousands of young stars are being born inside it.',
@@ -254,7 +254,7 @@ export const OBJECT_NOTES: Record<string, string> = {
   'Lagoon Nebula': 'A bright star-forming cloud in Sagittarius, visible to the naked eye from dark sites as a patch of light in the Milky Way.',
   'Dumbbell Nebula': 'One of the brightest planetary nebulae, and an easy target for small telescopes.',
   'Beehive Cluster': 'An open cluster that appears as a hazy patch to the naked eye. Galileo was the first to resolve it into stars.',
-  'Omega Centauri': 'By far the largest globular cluster in the Milky Way, containing millions of stars — possibly the stripped core of a small galaxy the Milky Way absorbed.',
+  'Omega Centauri': 'By far the largest globular cluster in the Milky Way, containing millions of stars, possibly the stripped core of a small galaxy the Milky Way absorbed.',
   '47 Tucanae': 'The second-brightest globular cluster in the sky, a dense southern showpiece.',
   'Sombrero Galaxy': 'An edge-on galaxy crossed by a striking dark dust lane.',
   'Double Cluster': 'A pair of young open clusters side by side in Perseus, best seen with binoculars at low magnification.'
@@ -269,7 +269,7 @@ export const OBJECT_NOTES: Record<string, string> = {
  */
 export const BLACK_HOLE_NOTES: Record<string, string> = {
   'Cygnus X-1':
-    'The first object widely accepted as a black hole. What you can actually see is HDE 226868, a blue supergiant of about magnitude 8.9 — within reach of binoculars — orbiting an unseen companion of roughly 21 solar masses. The black hole itself emits no light; it is detected by the X-rays from material being torn off its companion.',
+    'The first object widely accepted as a black hole. What you can actually see is HDE 226868, a blue supergiant of about magnitude 8.9 and within reach of binoculars, orbiting an unseen companion of roughly 21 solar masses. The black hole itself emits no light; it is detected by the X-rays from material being torn off its companion.',
   'V404 Cygni':
     'A black hole of roughly nine solar masses that spends most of its time quiet, then erupts. Its 2015 outburst made it one of the brightest X-ray sources in the sky for several weeks before it faded again.',
   'GRO J1655-40':
@@ -277,7 +277,7 @@ export const BLACK_HOLE_NOTES: Record<string, string> = {
   'A0620-00':
     'One of the nearest black holes to Earth, roughly three thousand light-years away in Monoceros. It flared dramatically in 1975 and has been quiet ever since; only the faint orange companion star remains visible.',
   'GRS 1915+105':
-    'A microquasar whose jets appear to move faster than light. They do not — it is a perspective illusion caused by material moving toward us at very nearly light speed — but it was the first object where the effect was seen in our own galaxy.',
+    'A microquasar whose jets appear to move faster than light. They do not. It is a perspective illusion caused by material moving toward us at very nearly light speed, but it was the first object where the effect was seen in our own galaxy.',
   'XTE J1118+480':
     'Unusual for sitting far above the plane of the Milky Way, out in the galactic halo. That position is hard to explain unless the system was flung there, or formed somewhere very different.',
   'GX 339-4':
@@ -285,7 +285,7 @@ export const BLACK_HOLE_NOTES: Record<string, string> = {
   'MAXI J1820+070':
     'Discovered in outburst in 2018, when it briefly became one of the brightest X-ray sources in the sky. Telescopes tracked its jets visibly moving across the sky over the following weeks.',
   'LMC X-1':
-    'A black hole in the Large Magellanic Cloud, our satellite galaxy — one of the first found outside the Milky Way. It draws material from a hot, massive companion star.',
+    'A black hole in the Large Magellanic Cloud, our satellite galaxy, and one of the first found outside the Milky Way. It draws material from a hot, massive companion star.',
   'LMC X-3':
     'A second black-hole binary in the Large Magellanic Cloud, and an important early case for measuring how much mass a compact object can have and still not be a neutron star.',
   'SS 433':
@@ -293,11 +293,11 @@ export const BLACK_HOLE_NOTES: Record<string, string> = {
   'Gaia BH1':
     'A "dormant" black hole, found not by X-rays but by the wobble it forces on an ordinary Sun-like star. ESA’s Gaia mission spotted the motion; nothing is falling in, so the system is otherwise silent. It is currently the closest black hole known to Earth.',
   'Sagittarius A*':
-    'The supermassive black hole at the centre of the Milky Way, about four million times the mass of the Sun and some twenty-six thousand light-years away. Decades of tracking stars whipping around it earned the 2020 Nobel Prize, and the Event Horizon Telescope released an image of its shadow in 2022. Thick dust hides it completely at visible wavelengths — the position here is exact, but there is nothing to see through a telescope.',
+    'The supermassive black hole at the centre of the Milky Way, about four million times the mass of the Sun and some twenty-six thousand light-years away. Decades of tracking stars whipping around it earned the 2020 Nobel Prize, and the Event Horizon Telescope released an image of its shadow in 2022. Thick dust hides it completely at visible wavelengths, so the position here is exact, but there is nothing to see through a telescope.',
   'M87*':
     'The first black hole ever imaged, released by the Event Horizon Telescope in 2019. It sits at the heart of the giant elliptical galaxy M87 in Virgo and weighs several billion solar masses. The galaxy itself is an easy target in a modest telescope; the black hole announces itself through a jet of plasma thousands of light-years long.',
   '3C 273':
-    'The first object ever recognised as a quasar, in 1963, and still the optically brightest one in our sky at around magnitude 13 — genuinely reachable with a large amateur telescope. Its light set out roughly two and a half billion years ago.',
+    'The first object ever recognised as a quasar, in 1963, and still the optically brightest one in our sky at around magnitude 13, genuinely reachable with a large amateur telescope. Its light set out roughly two and a half billion years ago.',
   'OJ 287':
     'Believed to hold two supermassive black holes orbiting one another. The smaller one crashes through the larger one’s accretion disc roughly every twelve years, producing flares that astronomers can predict years ahead.',
   'TON 618':

@@ -9,18 +9,22 @@ screen and asserts nothing threw along the way, so they cannot quietly drift out
 
 ## Principles
 
-1. **The sky is the interface.** Chrome is thin, translucent and pushed to the edges.
-   The map is always full-bleed.
-2. **Say where every number came from.** Nothing is presented without provenance. An
-   observer deciding whether to set up a telescope needs to know whether a rise time was
-   computed for their coordinates or copied from somewhere.
-3. **Absence is information.** "Not catalogued" is shown proudly. Inventing a plausible
-   distance would be worse than admitting there isn't one.
-4. **Explain, do not just display.** Every measurement has a tooltip explaining what it
-   means. Magnitude runs backwards; azimuth starts at north; a beginner does not know
-   this and should not have to leave the app to find out.
-5. **Nothing surprising happens.** Notifications, network access and location are all
-   opt-in, and every one of them can be revoked in Settings.
+The sky is the interface. Chrome stays thin, translucent and pushed to the edges, and
+the map is always full-bleed.
+
+Every number says where it came from. Someone deciding whether to drag a telescope
+outside needs to know whether a rise time was computed for their coordinates or copied
+from somewhere else, so the interface always says which.
+
+Absence counts as information. "Not catalogued" gets shown without embarrassment,
+because inventing a plausible distance would be worse than admitting there isn't one.
+
+Explaining beats displaying. Every measurement has a tooltip saying what it means.
+Magnitude runs backwards, azimuth starts at north, and a beginner has no reason to know
+either of those or to leave the app to find out.
+
+Nothing surprising happens. Notifications, network access and location are all opt-in,
+and all of them can be revoked in Settings.
 
 ## Colour
 
@@ -40,13 +44,13 @@ Body text is `slate-100` on `space-900` (about 15:1), secondary text `slate-400`
 6:1), and the faintest supporting text `slate-500` (about 4.6:1). All exceed WCAG AA;
 body text exceeds AAA.
 
-Status colours are used consistently and never alone — every coloured badge also carries
-a word:
+Status colours are used consistently and never on their own. Every coloured badge also
+carries a word:
 
 - emerald: visible now, achievement unlocked
-- amber: caution — twilight, stale data, location not set
-- sky blue: informational — calculated values
-- rose: destructive — erasing local data
+- amber: caution, meaning twilight, stale data, or a location that is not set
+- sky blue: informational, for calculated values
+- rose: destructive, for erasing local data
 
 ## Typography
 
@@ -138,12 +142,12 @@ data section reports exactly what is stored locally and how old it is.
 Everything on the map is drawn from real catalogue values. The only exaggerations are a
 minimum drawn size for the Moon and for clickable markers.
 
-**Stars** are coloured from their catalogued B−V index, sized by magnitude, and
-twinkle — with an amplitude that rises toward the horizon, because scintillation is an
+Stars are coloured from their catalogued B−V index, sized by magnitude, and
+twinkle, with an amplitude that rises toward the horizon, because scintillation is an
 atmospheric effect and that is where the atmosphere is thickest. The brightest stars get
 diffraction spikes and a soft bloom, which is how the eye reads "bright".
 
-**Nebulae, clusters and galaxies** are drawn at their catalogued major axis, minor axis
+Nebulae, clusters and galaxies are drawn at their catalogued major axis, minor axis
 and position angle, so shapes and orientations are real. Colours follow long-exposure
 appearance: hydrogen-emission nebulae red-pink, reflection nebulae blue, planetary
 nebulae green-teal, globular clusters warm yellow, open clusters blue-white. Fainter
@@ -152,20 +156,20 @@ shape identifies it.
 
 ![The Orion Nebula magnified](screenshots/13-nebula.png)
 
-**The Milky Way** is not a painted texture. It is 74 559 real stars between magnitude
+The Milky Way is not a painted texture. It is 74,559 real stars between magnitude
 6.5 and 9.0 from the HYG catalogue; the band is their genuine density along the galactic
 plane. It fades out at high magnification, where individual faint stars would read as
 speckle rather than glow.
 
 ![The galactic centre](screenshots/11-milky-way.png)
 
-**The Moon** is drawn with its true phase. The terminator is the projected ellipse it
+The Moon is drawn with its true phase. The terminator is the projected ellipse it
 actually is, the bright limb points at the computed position of the Sun, and the unlit
 portion carries a hint of earthshine.
 
 ![A waxing crescent](screenshots/12-moon.png)
 
-**Photography** is layered underneath everything computed. The all-sky panorama supplies
+Photography sits underneath everything computed. The all-sky panorama supplies
 the dust and nebulosity of the Milky Way that no catalogue contains, held well below the
 computed sky so labels stay legible, and faded out once the field narrows past the
 panorama's own resolution.
@@ -179,20 +183,20 @@ the stars in the photograph.
 
 ![A survey image of the Orion Nebula in place](screenshots/15-object-photo.png)
 
-**Black holes** get a deliberately symbolic mark — a dark shadow inside a slowly turning,
-Doppler-brightened accretion ring. Nothing about a black hole is visible at these
-scales, and the details panel says so; the marker exists to show *where* they are.
+Black holes get a deliberately symbolic mark: a dark shadow inside a slowly turning,
+Doppler-brightened accretion ring. Nothing about a black hole is visible at these scales,
+and the details panel says so. The marker is there to show where they are.
 
 ![Sagittarius A* in the galactic centre](screenshots/10-black-hole.png)
 
 ## Motion
 
-Transitions are 150–250 ms on a `cubic-bezier(0.22, 1, 0.36, 1)` curve. Camera moves to
+Transitions run 150 to 250 ms on a `cubic-bezier(0.22, 1, 0.36, 1)` curve. Camera moves to
 a selected object ease over 700 ms and take the shorter way around the compass.
 
-Every animation in the sky map — twinkle, nebula breathing, accretion-ring rotation — is
-multiplied by an `animate` uniform that is set to zero when the operating system reports
-`prefers-reduced-motion: reduce`. The CSS honours the same preference.
+Every animation in the sky map (twinkle, nebula breathing, the turning accretion rings)
+is multiplied by an `animate` uniform, which drops to zero when the operating system
+reports `prefers-reduced-motion: reduce`. The CSS honours the same preference.
 
 ## Accessibility
 

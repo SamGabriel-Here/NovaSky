@@ -105,7 +105,7 @@ export function SettingsScreen(): JSX.Element {
               checked={settings.showBlackHoles}
               onChange={(value) => void updateSettings({ showBlackHoles: value })}
               label="Black holes"
-              description="Confirmed black holes and strong candidates, with positions from SIMBAD. Nothing is visible at the eyepiece — the marker shows where they are."
+              description="Confirmed black holes and strong candidates, with positions from SIMBAD. Nothing is visible at the eyepiece; the marker just shows where they are."
             />
             <Toggle
               checked={settings.showMilkyWay}

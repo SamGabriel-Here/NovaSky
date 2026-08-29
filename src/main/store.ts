@@ -1,8 +1,8 @@
 /**
  * Local persistence.
  *
- * Everything NovaSky remembers — your location, your settings, quiz progress and the
- * cached satellite elements — lives on this machine in a SQLite database inside the
+ * Everything NovaSky remembers (your location, your settings, quiz progress and the
+ * cached satellite elements) lives on this machine in a SQLite database inside the
  * app's userData directory. Nothing is uploaded.
  *
  * better-sqlite3 is a native module. If it fails to load (an unrebuilt binary on an

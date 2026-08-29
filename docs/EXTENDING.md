@@ -12,7 +12,7 @@ src/renderer/            draws them and explains them
 ```
 
 `src/shared` is free of Electron and DOM imports. Anything astronomical belongs there,
-which is what makes it directly testable.
+where it can be tested directly.
 
 ## Adding a new class of object
 
@@ -25,7 +25,7 @@ Add a source to `SOURCES` and a `buildX()` function in `scripts/build-data.mjs`,
 a compact JSON file into `resources/data/`. Two rules:
 
 - Never hand-enter a coordinate. If the objects are not in a downloadable catalogue,
-  query an authority for them at build time — the black-hole builder holds a list of
+  query an authority for them at build time. The black-hole builder holds a list of
   SIMBAD identifiers and asks SIMBAD's TAP service for the positions.
 - Write `null` for anything the source does not have. The UI is built to say "Not
   catalogued", and that is always better than a plausible-looking guess.
@@ -36,7 +36,7 @@ Add the new file to the manifest counts so it shows up in Settings, and register
 ### 2. Add the kind
 
 Add to `ObjectKind` in `src/shared/types.ts`. TypeScript will now tell you every place
-that has to handle it — `KIND_LABEL` in the search palette, the label CSS classes, the
+that has to handle it: `KIND_LABEL` in the search palette, the label CSS classes, the
 renderer's label-offset switch. Work through the errors.
 
 ### 3. Model it
@@ -68,7 +68,7 @@ In `src/renderer/sky/SkyRenderer.ts`:
 - Add the layer to the array in `updateCamera` so it receives the shared uniforms
   (`zoom`, `elapsed`, `pxPerDegree`, `aspect`, `animate`).
 - Push labels and pick targets in `refreshLabels`. Picking is a dot product against
-  every candidate, so nothing special is required — just add to `pickTargets`.
+  every candidate, so nothing special is required. Just add to `pickTargets`.
 
 Shaders get `elapsed` in seconds and `animate`, which is `0` when the user has asked for
 reduced motion. Multiply every time-varying term by `animate`.
@@ -89,8 +89,8 @@ details-panel assertion to `tests/ui/components.test.tsx`.
 
 1. Add the kind to `AstroEventKind` in `src/shared/types.ts`.
 2. Write a `getX(from, to, location)` in `src/shared/astro/events.ts` returning
-   `AstroEvent[]`. Use `eventId(kind, key, time)` so ids are stable and unique — the
-   test suite asserts uniqueness.
+   `AstroEvent[]`. Use `eventId(kind, key, time)` so ids are stable and unique, which
+   the test suite checks.
 3. Call it from `getEvents`, guarded by `include(kind)`.
 4. Add presentation in `KIND_META` in `EventsScreen.tsx` and an entry in
    `NOTIFICATION_KINDS` in `SettingsScreen.tsx`.
@@ -99,7 +99,7 @@ details-panel assertion to `tests/ui/components.test.tsx`.
 
 Beware `Astronomy.Search*` helpers over long windows: several of them bisect for a sign
 change in a quantity that wraps annually and will return `null` rather than fail loudly.
-Bracket the search near an estimate — `sunReachesLongitude` shows the pattern.
+Bracket the search near an estimate instead. `sunReachesLongitude` shows the pattern.
 
 ## Adding a new data source
 
@@ -110,8 +110,8 @@ Bracket the search near an estimate — `sunReachesLongitude` shows the pattern.
    store, and must return a result carrying `origin: 'live' | 'cached'` plus a `warning`
    when the data is stale. Follow `getTleBundle`.
 3. Add the host to `ALLOWED_LINK_HOSTS` in `src/main/ipc.ts` if the UI links to it. The
-   renderer cannot open arbitrary URLs — `shell:open-external` refuses anything that is
-   not https and on that list.
+   renderer cannot open arbitrary URLs, and `shell:open-external` refuses anything that
+   is not https and on that list.
 4. Document it in `docs/DATA_SOURCES.md`, including its licence.
 
 ## Adding a learning activity or quiz
@@ -131,7 +131,7 @@ Everything is data in `src/shared/learn.ts`.
 `src/main/store.ts` keeps settings as one row per key, so adding a setting never
 invalidates the others and an unknown key is ignored. New tables go in the `SCHEMA`
 constant, which runs `CREATE TABLE IF NOT EXISTS` on every start. Mirror any new method
-in both `SqliteStore` and `JsonStore` — the JSON store is the fallback when the native
+in both `SqliteStore` and `JsonStore`. The JSON store is the fallback when the native
 binding will not load, and the `Store` interface will not compile until both implement it.
 
 ## Adding imagery
@@ -139,11 +139,11 @@ binding will not load, and the `Store` interface will not compile until both imp
 Imagery is kept apart from measurements throughout: `src/main/imagery.ts` is the only
 module that produces it, and it never feeds a calculation.
 
-- **Bundled** imagery is downloaded by `scripts/build-data.mjs`, listed in
+- Bundled imagery is downloaded by `scripts/build-data.mjs`, listed in
   `electron-builder.yml` under `extraResources`, and read by `readSkyImage`. Send it to
-  the renderer as raw bytes over IPC and turn it into a blob URL there — that keeps
+  the renderer as raw bytes over IPC and turn it into a blob URL there. That keeps
   `img-src` in the CSP limited to `blob:` instead of opening it to the filesystem.
-- **Fetched** imagery goes through `getObjectImage`, which must respect
+- Fetched imagery goes through `getObjectImage`, which must respect
   `settings.allowNetwork`, cache through the store, and return an `origin` of `live` or
   `cached` plus a `warning` when it cannot deliver. An absent image is a normal outcome:
   the sky map keeps its computed rendering.
@@ -157,8 +157,8 @@ stars in the photograph.
 ## A note on the CSP
 
 `src/shared/csp.ts` builds the renderer's Content Security Policy. A policy that is too
-tight fails *silently* — Electron blocks the script, the window comes up blank, and
-nothing appears in the terminal. If you add anything that loads a resource in the
+tight fails silently. Electron blocks the script, the window comes up blank, and nothing
+appears in the terminal. If you add anything that loads a resource in the
 renderer, extend the policy there and add an assertion to `tests/main/csp.test.ts`.
 `createWindow` also forwards renderer console errors and `did-fail-load` to the terminal
 in dev, so a future blank window announces itself.
@@ -167,5 +167,5 @@ in dev, so a future blank window announces itself.
 
 The renderer has no Node access. Everything privileged goes through one of the channels
 in `src/main/ipc.ts`, mirrored one-to-one in `src/preload/index.ts`. If you need a new
-capability, add it in both files and nowhere else — that pair of files is the whole
-trust boundary, and it is meant to stay small enough to read in one sitting.
+capability, add it in both files and nowhere else. That pair of files is the whole trust
+boundary, and it is meant to stay small enough to read in one sitting.

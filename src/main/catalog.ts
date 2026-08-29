@@ -3,8 +3,8 @@
  *
  * In development the files sit in `resources/data` next to the source. In a packaged
  * build electron-builder copies them to `process.resourcesPath/data` (see
- * electron-builder.yml). Either way they are on the local disk, which is what makes
- * the sky map, search and Visible Tonight work with no network at all.
+ * electron-builder.yml). Either way they sit on the local disk, so the sky map, search
+ * and Visible Tonight all work with no network at all.
  */
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'

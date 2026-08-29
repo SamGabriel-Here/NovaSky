@@ -285,7 +285,7 @@ export interface Catalog {
   stars: RawStar[]
   /**
    * Flat `[ra, dec, mag, colourIndex, ...]` for the telescopic stars that make up the
-   * Milky Way glow. Never searched or selected — purely a rendering layer.
+   * Milky Way glow. Never searched or selected, purely a rendering layer.
    */
   faintStars: Float32Array
   constellations: RawConstellation[]

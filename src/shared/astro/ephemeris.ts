@@ -88,7 +88,7 @@ export function getPosition(
   }
 }
 
-/** Altitude only — cheaper when scanning a night hour by hour. */
+/** Altitude only, which is cheaper when scanning a night hour by hour. */
 function altitudeAt(body: Astronomy.Body, time: Astronomy.AstroTime, observer: Astronomy.Observer): number {
   const eq = Astronomy.Equator(body, time, observer, true, true)
   return Astronomy.Horizon(time, observer, eq.ra, eq.dec, 'normal').altitude
@@ -100,11 +100,11 @@ export interface DarkWindow {
   /** Start of full astronomical darkness, or of the darkest available twilight. */
   darkStart: string | null
   darkEnd: string | null
-  /** True when the Sun never reaches -18 degrees — summer nights at high latitude. */
+  /** True when the Sun never reaches -18 degrees, as on summer nights at high latitude. */
   neverFullyDark: boolean
-  /** True when the Sun never rises above the horizon — polar night. */
+  /** True when the Sun never rises above the horizon, meaning polar night. */
   polarNight: boolean
-  /** True when the Sun never sets — midnight Sun. */
+  /** True when the Sun never sets, meaning midnight Sun. */
   polarDay: boolean
 }
 

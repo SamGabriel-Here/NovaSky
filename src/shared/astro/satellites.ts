@@ -2,7 +2,7 @@
  * Satellite tracking via SGP4.
  *
  * TLE (two-line element) sets come from CelesTrak and are propagated with satellite.js.
- * TLEs decay in accuracy quickly — a set more than a few days old is worth a warning,
+ * TLEs decay in accuracy quickly. A set more than a few days old is worth a warning,
  * and beyond a couple of weeks the positions are not trustworthy at all. Every result
  * carries a {@link DataOrigin} so the UI can say whether it is live or cached.
  */
@@ -64,7 +64,7 @@ export function tleAgeHours(bundle: TleBundle, now: Date = new Date()): number {
 export function tleWarning(bundle: TleBundle, now: Date = new Date()): string | null {
   const age = tleAgeHours(bundle, now)
   if (age > TLE_UNUSABLE_HOURS) {
-    return `Satellite elements are ${Math.round(age / 24)} days old. Positions shown are unreliable — reconnect to refresh them.`
+    return `Satellite elements are ${Math.round(age / 24)} days old. Positions shown are unreliable. Reconnect to refresh them.`
   }
   if (age > TLE_STALE_HOURS) {
     return `Satellite elements are ${Math.round(age)} hours old and drifting. Positions may be off by several degrees.`
@@ -93,7 +93,7 @@ export interface SatelliteState {
 function sunDirectionEci(date: Date): { x: number; y: number; z: number } {
   const time = Astronomy.MakeTime(date)
   // satellite.js works in TEME, which differs from the true equator of date by well
-  // under a degree — irrelevant for deciding whether a satellite is in shadow.
+  // under a degree, which is irrelevant for deciding whether a satellite is in shadow.
   const eqj = Astronomy.GeoVector(Astronomy.Body.Sun, time, false)
   const eqd = Astronomy.RotateVector(Astronomy.Rotation_EQJ_EQD(time), eqj)
   const length = Math.hypot(eqd.x, eqd.y, eqd.z)
@@ -292,7 +292,7 @@ function observerSunAltitude(date: Date, observer: Astronomy.Observer): number {
 
 /** Satellites NovaSky highlights by default. */
 export const FEATURED_SATELLITES = [
-  { noradId: 25544, name: 'ISS (ZARYA)', note: 'The International Space Station — by far the brightest satellite, and easily mistaken for an aircraft without flashing lights.' },
+  { noradId: 25544, name: 'ISS (ZARYA)', note: 'The International Space Station, by far the brightest satellite, and easily mistaken for an aircraft without flashing lights.' },
   { noradId: 48274, name: 'CSS (TIANHE)', note: 'The core module of the Chinese space station, the second-brightest crewed object in orbit.' },
   { noradId: 20580, name: 'HST', note: 'The Hubble Space Telescope. Visible from low latitudes as a modest moving star.' }
 ]

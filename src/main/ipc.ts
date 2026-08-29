@@ -2,7 +2,7 @@
  * The main <-> renderer contract.
  *
  * The renderer has no Node access (contextIsolation is on, nodeIntegration is off), so
- * every privileged operation — disk, network, notifications — comes through one of
+ * every privileged operation (disk, network, notifications) comes through one of
  * these channels. Keeping them in one file makes the app's whole trust boundary
  * reviewable at a glance.
  */

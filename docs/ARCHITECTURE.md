@@ -37,11 +37,11 @@ suite exercises it directly.
   `connect-src 'self'`: the renderer makes no network requests at all, catalogues arrive
   over IPC, and satellite elements are fetched by the main process. Development
   additionally allows `'unsafe-inline'` scripts and the localhost dev server, because
-  @vitejs/plugin-react injects its React Refresh preamble as an inline script — block it
-  and the window renders nothing. `tests/main/csp.test.ts` asserts the dev relaxations
+  @vitejs/plugin-react injects its React Refresh preamble as an inline script, and if you
+  block that the window renders nothing at all. `tests/main/csp.test.ts` asserts the dev relaxations
   never reach a packaged build.
-- All web permissions are denied. NovaSky needs no camera, microphone or geolocation —
-  location is typed in or derived from the system time zone.
+- All web permissions are denied. The app needs no camera, microphone or geolocation.
+  Location is typed in or worked out from the system time zone.
 - `setWindowOpenHandler` denies every popup and forwards https URLs to the system
   browser. `will-navigate` blocks navigation away from the app shell.
 - `shell:open-external` accepts https only, and only for an allowlist of six hosts.
@@ -52,14 +52,14 @@ Every fixed object is stored once as a unit vector in the J2000 equatorial frame
 one Three.js group. Orienting the sky for a given time and place is a single matrix
 assignment on that group, obtained from `Astronomy.Rotation_EQJ_HOR` and re-labelled
 into the renderer's axes. Changing the time therefore costs one matrix update rather
-than 83 000 trigonometric conversions, which is what makes scrubbing the Time Machine
-smooth and what makes month-per-second playback possible at all.
+than 83,000 trigonometric conversions. That is why scrubbing the Time Machine feels
+smooth, and why month-per-second playback is possible at all.
 
 The horizon, ground, compass points, alt-azimuth grid and satellites live in a second
 group in the observer's frame, so they stay still while the sky turns above them.
 
 Solar-System bodies are the exception: they move, so their vertices are rewritten
-whenever the time changes — ten objects, not ten thousand.
+whenever the time changes. That is ten objects, not ten thousand.
 
 Imagery rides on the same frame. The all-sky panorama is an inverted sphere inside the
 sky group, so it turns with the sky for free; its shader rotates each view direction into
@@ -68,8 +68,8 @@ vertices are computed from the gnomonic projection the survey delivers, which is
 makes them land registered with the catalogue stars.
 
 The ground is a hemisphere, not a disc. The camera sits at the origin, and a horizontal
-plane containing the eye projects to a line rather than a filled region — a disc occludes
-nothing at all.
+plane containing the eye projects to a line instead of a filled region, so a disc
+occludes nothing at all.
 
 Picking is a dot product of the click ray against every candidate, with the ray rotated
 into the sky group's frame first. Ten thousand dot products per click is far cheaper and
@@ -91,8 +91,8 @@ inputs rounded to a sensible resolution:
 | `useTonightPlan` | observer, beginner mode, or sky time to 15 minutes |
 
 The Tonight planner evaluates a shortlist of candidates analytically rather than
-sampling: a fixed object's altitude peaks at transit, so three position computations —
-window start, window end, and transit if it falls inside — find its best moment exactly.
+sampling. A fixed object's altitude peaks at transit, so three position computations
+(window start, window end, and transit if it falls inside) find its best moment exactly.
 
 ## State
 
@@ -102,4 +102,4 @@ then the main process confirms and returns the authoritative value. Screens are
 presentational and read from the store.
 
 Beginner mode is applied as an overlay by `effectiveSettings`, never by overwriting the
-user's stored preferences — so turning it off restores exactly what they had.
+user's stored preferences, so turning it off restores exactly what they had.

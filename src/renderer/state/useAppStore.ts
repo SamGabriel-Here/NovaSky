@@ -190,7 +190,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   async toggleBeginnerMode() {
     const next = !get().settings.beginnerMode
     await get().updateSettings({ beginnerMode: next })
-    get().showToast(next ? 'Beginner mode on — showing the brightest objects only.' : 'Beginner mode off.')
+    get().showToast(next ? 'Beginner mode on. Showing the brightest objects only.' : 'Beginner mode off.')
   },
 
   setSearchOpen: (searchOpen) => set({ searchOpen }),
@@ -246,7 +246,7 @@ export const useAppStore = create<AppState>((set, get) => ({
  *
  * The derivation has to happen outside the selector. `effectiveSettings` builds a new
  * object when beginner mode is on, and a selector that returns a fresh object every
- * call makes `useSyncExternalStore` believe the store changed on every render — React
+ * call makes `useSyncExternalStore` believe the store changed on every render. React
  * then re-renders forever and throws "Maximum update depth exceeded". Selecting the
  * stable `settings` reference and memoising on it keeps the result referentially stable.
  */

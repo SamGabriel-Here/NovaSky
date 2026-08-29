@@ -1,7 +1,7 @@
 /**
  * Beginner learning content: guided activities, quizzes and achievements.
  *
- * Activities are checked against the app's real state — an activity completes when you
+ * Activities are checked against the app's real state. An activity completes when you
  * actually select its target in the sky map, not when you click "done". Object ids here
  * match the catalogue ids built in astro/catalog.ts.
  */
@@ -13,7 +13,7 @@ export interface Activity {
   /** Catalogue id the learner has to find and select. */
   targetObjectId: string
   /**
-   * Alternative target for observers who can never see the primary one — Polaris is
+   * Alternative target for observers who can never see the primary one. Polaris is
    * invisible from the southern hemisphere, for instance.
    */
   southernTargetObjectId?: string
@@ -30,12 +30,12 @@ export const ACTIVITIES: Activity[] = [
     summary: 'The easiest constellation to recognise, and the gateway to half the winter sky.',
     targetObjectId: 'con:Ori',
     steps: [
-      'Open the Sky screen and look for three equally bright stars in a short, straight line. That is Orion’s Belt — nothing else in the sky looks quite like it.',
+      'Open the Sky screen and look for three equally bright stars in a short, straight line. That is Orion’s Belt, and nothing else in the sky looks quite like it.',
       'Above and to one side of the belt sits a distinctly orange star, Betelgeuse. Diagonally opposite it is blue-white Rigel.',
       'Hanging below the belt is a fainter line of stars: the sword. The fuzzy middle "star" is the Orion Nebula.',
       'Click on Orion in the map to complete this activity.'
     ],
-    hint: 'If it is not up right now, press T and move the clock forward a few hours — or a few months. Orion is a northern-winter constellation.',
+    hint: 'If it is not up right now, press T and move the clock forward a few hours, or a few months. Orion is a northern-winter constellation.',
     achievement: 'orion-found'
   },
   {
@@ -47,7 +47,7 @@ export const ACTIVITIES: Activity[] = [
       'Planets shine with a steady light, while stars twinkle. Jupiter is usually the second-brightest planet after Venus.',
       'Use the Tonight screen to see whether Jupiter is up, and at what time it is highest.',
       'Set the Time Machine to that moment, then find Jupiter on the map and click it.',
-      'Check its distance in the details panel — it changes noticeably as Earth and Jupiter orbit the Sun.'
+      'Check its distance in the details panel. It changes noticeably as Earth and Jupiter orbit the Sun.'
     ],
     hint: 'Jupiter is not visible every night of the year. If it is below the horizon, the Time Machine will get you to a night when it is up.',
     achievement: 'jupiter-found'
@@ -59,12 +59,12 @@ export const ACTIVITIES: Activity[] = [
     targetObjectId: 'star:11734',
     southernTargetObjectId: 'con:Cru',
     southernNote:
-      'Polaris never rises from the southern hemisphere. From there, the long axis of the Southern Cross points to the south celestial pole instead — so this activity uses Crux.',
+      'Polaris never rises from the southern hemisphere. From there, the long axis of the Southern Cross points to the south celestial pole instead, so this activity uses Crux.',
     steps: [
-      'Find the Big Dipper — seven bright stars in the shape of a saucepan, part of Ursa Major.',
+      'Find the Big Dipper, seven bright stars in the shape of a saucepan, part of Ursa Major.',
       'Take the two stars at the outer end of the "pan" and follow the line they make, away from the handle.',
       'The first reasonably bright star you meet is Polaris, at the end of the Little Dipper’s handle.',
-      'Click Polaris and watch its altitude in the details panel — it is almost exactly your latitude.'
+      'Click Polaris and watch its altitude in the details panel. It is almost exactly your latitude.'
     ],
     hint: 'Turn on constellation lines to see the Dipper shape drawn in.',
     achievement: 'polaris-found'
@@ -75,7 +75,7 @@ export const ACTIVITIES: Activity[] = [
     summary: 'The Moon is the one object whose appearance changes night to night.',
     targetObjectId: 'moon',
     steps: [
-      'Click the Moon on the sky map. The details panel shows the illuminated fraction — how much of the disc is lit.',
+      'Click the Moon on the sky map. The details panel shows the illuminated fraction, meaning how much of the disc is lit.',
       'Open the Time Machine, set the speed to one day per second, and press play. Watch the illumination run through a full cycle.',
       'A full cycle takes about 29.5 days. Notice that a bright Moon also makes the rest of the sky harder to observe.',
       'Check the Tonight screen: it warns you when moonlight will wash out faint targets.'
@@ -153,7 +153,7 @@ export const QUIZZES: Quiz[] = [
   {
     id: 'quiz-objects',
     title: 'Objects in the sky',
-    description: 'Stars, planets, clusters and galaxies — and how to tell them apart.',
+    description: 'Stars, planets, clusters and galaxies, and how to tell them apart.',
     questions: [
       {
         id: 'messier',

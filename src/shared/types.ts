@@ -186,7 +186,7 @@ export interface SatellitePass {
   maxAltitude: number
   riseAzimuth: number
   setAzimuth: number
-  /** Sunlit satellite against a dark sky — the only kind you can actually see. */
+  /** Sunlit satellite against a dark sky, which is the only kind you can actually see. */
   visible: boolean
   origin: DataOrigin
 }

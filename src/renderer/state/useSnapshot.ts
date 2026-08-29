@@ -2,7 +2,7 @@
  * Hooks that run the astronomy calculations for the UI.
  *
  * Rise/set searches are not free, so results are memoised on the object, the observer
- * and the sky time rounded to the minute — fine-grained enough that nothing visibly
+ * and the sky time rounded to the minute. That is fine enough that nothing visibly
  * lags behind the clock, coarse enough that a one-second tick does not redo the work.
  */
 import { useMemo } from 'react'

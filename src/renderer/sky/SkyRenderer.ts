@@ -4,8 +4,8 @@
  * Design note: every fixed object is stored once in the EQJ frame inside `skyGroup`,
  * and the entire sky is oriented for the current time and place by setting a single
  * rotation matrix on that group (see coords.eqjToWorldMatrix). Changing the time or
- * the observer therefore costs one matrix update rather than 9 000 trigonometric
- * conversions, which is what makes scrubbing the Time Machine smooth.
+ * the observer therefore costs one matrix update instead of 9,000 trigonometric
+ * conversions, so scrubbing the Time Machine stays smooth.
  *
  * The horizon, the ground and the compass points live in the world frame instead, so
  * they stay put while the sky turns above them.
@@ -48,7 +48,7 @@ export interface CameraState {
   /** Direction the camera looks, in the horizontal frame. */
   altitude: number
   azimuth: number
-  /** Vertical field of view in degrees — the zoom level. */
+  /** Vertical field of view in degrees, which is the zoom level. */
   fov: number
 }
 
@@ -218,7 +218,7 @@ const STAR_VERTEX = /* glsl */ `
     // almost absent at the zenith. sin(altitude) is just the normalised world height.
     float sinAltitude = clamp(world.y / 100.0, -1.0, 1.0);
     float airmass = 1.0 - smoothstep(0.02, 0.7, sinAltitude);
-    // Two incommensurate frequencies per star give an irregular flicker rather than a pulse.
+    // Two incommensurate frequencies per star give an irregular flicker instead of a pulse.
     float phase = seed * 6.2831853;
     float flicker =
       sin(elapsed * 2.7 + phase) * 0.6 + sin(elapsed * 6.1 + phase * 2.3) * 0.4;
@@ -228,7 +228,7 @@ const STAR_VERTEX = /* glsl */ `
     vAlpha *= clamp(modulation, 0.35, 1.6);
 
     // Brighter stars get bigger points; zoom scales everything so the sky feels
-    // magnified rather than merely cropped.
+    // magnified, not just cropped.
     float size = max(1.1, (magnitudeLimit + 1.2 - magnitude) * 1.35) * zoom * pixelRatio;
     // Only genuinely bright stars earn diffraction spikes, and they need the extra
     // point area to draw them into.
@@ -249,7 +249,7 @@ const STAR_FRAGMENT = /* glsl */ `
     float distance = length(offset);
     if (distance > 0.5) discard;
 
-    // Core: a bright centre with a short falloff, which reads as a star rather than a
+    // Core: a bright centre with a short falloff, which reads as a star instead of a
     // square dot and hides how few pixels a small point actually has.
     float core = smoothstep(0.5, 0.06, distance);
     float intensity = core;
@@ -270,8 +270,8 @@ const STAR_FRAGMENT = /* glsl */ `
 `
 
 /**
- * Telescopic stars. Sub-pixel dots, no twinkle, no spikes — they exist collectively,
- * as the Milky Way, rather than individually.
+ * Telescopic stars: sub-pixel dots with no twinkle and no diffraction spikes. They
+ * exist collectively, as the Milky Way, not as individual objects.
  */
 const FAINT_STAR_VERTEX = /* glsl */ `
   attribute float magnitude;
@@ -301,8 +301,8 @@ const FAINT_STAR_FRAGMENT = /* glsl */ `
 `
 
 /**
- * Extended objects — nebulae, clusters and galaxies — drawn at their real catalogued
- * angular size and shape rather than as uniform dots, so a sprawling nebula looks
+ * Extended objects (nebulae, clusters and galaxies) drawn at their real catalogued
+ * angular size and shape instead of as uniform dots, so a sprawling nebula looks
  * sprawling and a distant galaxy looks small.
  */
 const NEBULA_VERTEX = /* glsl */ `
@@ -401,8 +401,8 @@ const MARKER_FRAGMENT = /* glsl */ `
 
 /**
  * Black holes get their own mark: a dark centre inside a turning accretion ring. It is
- * a symbol, not a picture — nothing about a black hole is visible at these scales — but
- * it makes the one class of object that emits no light impossible to miss.
+ * a symbol rather than a picture, since nothing about a black hole is visible at these
+ * scales, but it makes the one class of object that emits no light impossible to miss.
  */
 const BLACK_HOLE_VERTEX = /* glsl */ `
   attribute float markerSize;
@@ -526,7 +526,7 @@ const PLANET_FRAGMENT = /* glsl */ `
     vec2 offset = gl_PointCoord - vec2(0.5);
     float distance = length(offset);
     if (distance > 0.5) discard;
-    // Planets shine steadily — no twinkle — with a soft glow around a solid disc.
+    // Planets shine steadily, with no twinkle and a soft glow around a solid disc.
     float core = smoothstep(0.34, 0.12, distance);
     float glow = exp(-distance * 7.0) * 0.55;
     gl_FragColor = vec4(vTint, clamp(core + glow, 0.0, 1.0));
@@ -916,8 +916,8 @@ export class SkyRenderer {
       material
     )
     this.objectImage.frustumCulled = false
-    // Above the panorama and above the computed glow of the same object — the
-    // photograph replaces that glow rather than competing with it — but below the star
+    // Above the panorama and above the computed glow of the same object, since the
+    // photograph replaces that glow rather than competing with it. Still below the star
     // points and markers, which stay readable on top.
     this.objectImage.renderOrder = 0
     this.objectImage.visible = this.options.showObjectImagery
@@ -1007,7 +1007,7 @@ export class SkyRenderer {
 
     // Only objects with a measured size, and only ones bright enough to be worth
     // showing, get a glow; the rest keep their ring marker alone. Dark nebulae are
-    // excluded outright — they are silhouettes, and an additive glow would render them
+    // excluded outright, because they are silhouettes and an additive glow renders them
     // as exactly the opposite of what they are.
     const entries = this.catalog.deepSky.filter(
       (d) =>
@@ -1099,10 +1099,10 @@ export class SkyRenderer {
   }
 
   /**
-   * The Moon gets its own sprite so it can be drawn with its real phase rather than as
-   * a featureless dot. Its true angular diameter is about half a degree, but a
+   * The Moon gets its own sprite so it can be drawn with its real phase instead of a
+   * featureless dot. Its true angular diameter is about half a degree, but a
    * half-degree disc is only a few pixels at a typical field of view, so the sprite is
-   * given a floor — the same exaggeration every planetarium makes so the phase is
+   * given a floor, the same exaggeration every planetarium makes so the phase stays
    * legible.
    */
   private buildMoon(): void {
@@ -1460,7 +1460,7 @@ export class SkyRenderer {
     //
     // This has to be a hemisphere rather than a disc. The camera sits at the origin,
     // which is *in* the plane of any horizontal disc, and a plane containing the eye
-    // projects to a line rather than a filled region — so a disc occludes nothing at
+    // projects to a line instead of a filled region, so a disc occludes nothing at
     // all. The slight transparency keeps objects below the horizon faintly visible,
     // which helps when working out what is about to rise.
     const ground = new THREE.Mesh(
@@ -1859,7 +1859,7 @@ export class SkyRenderer {
     }
 
     // Fade the Milky Way out as the field narrows: at high magnification the faint
-    // stars separate into a distracting speckle rather than reading as a glow.
+    // stars separate into a distracting speckle instead of reading as a glow.
     if (this.faintStars) {
       const material = this.faintStars.material as THREE.ShaderMaterial
       material.uniforms.opacity.value = Math.min(1, this.cameraState.fov / 35)
@@ -1929,8 +1929,8 @@ export class SkyRenderer {
    * Finds the object nearest to a screen point.
    *
    * The click is turned into a world-space ray, rotated into the sky group's frame,
-   * then compared against every candidate by dot product — 10 000 dot products is far
-   * cheaper and far more reliable than raycasting against a Points cloud.
+   * then compared against every candidate by dot product. Ten thousand dot products is
+   * far cheaper and far more reliable than raycasting against a Points cloud.
    */
   pick(offsetX: number, offsetY: number): string | null {
     const width = this.canvas.clientWidth || 1
@@ -1992,7 +1992,7 @@ function disposeShaderMaterial(material: THREE.ShaderMaterial): void {
 
 /**
  * Turns raw JPEG bytes into a texture via a blob URL, which keeps `img-src` in the
- * Content Security Policy limited to `blob:` rather than opening it up to the
+ * Content Security Policy limited to `blob:` instead of opening it up to the
  * filesystem. The URL is revoked as soon as the decode completes.
  */
 function loadJpegTexture(bytes: Uint8Array): THREE.Texture {

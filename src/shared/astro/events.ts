@@ -41,7 +41,7 @@ export const METEOR_SHOWERS: MeteorShower[] = [
   { id: 'cap', name: 'Alpha Capricornids', peakSolarLongitude: 127, zhr: 5, radiantRa: 20.47, radiantDec: -10, activeFrom: [7, 3], activeTo: [8, 15], parent: 'Comet 169P/NEAT', note: 'Low rates, but known for slow, bright fireballs.' },
   { id: 'sda', name: 'Southern Delta Aquariids', peakSolarLongitude: 125, zhr: 25, radiantRa: 22.67, radiantDec: -16, activeFrom: [7, 12], activeTo: [8, 23], parent: 'Comet 96P/Machholz', note: 'A broad maximum favouring southern and low northern latitudes.' },
   { id: 'per', name: 'Perseids', peakSolarLongitude: 140, zhr: 100, radiantRa: 3.2, radiantDec: 58, activeFrom: [7, 17], activeTo: [8, 24], parent: 'Comet 109P/Swift-Tuttle', note: 'The most-watched shower of the northern year, helped by warm August nights.' },
-  { id: 'dra', name: 'Draconids', peakSolarLongitude: 195.4, zhr: 10, radiantRa: 17.47, radiantDec: 54, activeFrom: [10, 6], activeTo: [10, 10], parent: 'Comet 21P/Giacobini-Zinner', note: 'Highly variable — usually quiet, but has produced storms of thousands per hour. Best in the evening rather than after midnight.' },
+  { id: 'dra', name: 'Draconids', peakSolarLongitude: 195.4, zhr: 10, radiantRa: 17.47, radiantDec: 54, activeFrom: [10, 6], activeTo: [10, 10], parent: 'Comet 21P/Giacobini-Zinner', note: 'Highly variable. Usually quiet, but it has produced storms of thousands per hour. Best in the evening rather than after midnight.' },
   { id: 'ori', name: 'Orionids', peakSolarLongitude: 208, zhr: 20, radiantRa: 6.33, radiantDec: 16, activeFrom: [10, 2], activeTo: [11, 7], parent: 'Comet 1P/Halley', note: 'The second shower fed by Halley’s Comet, with fast meteors and a broad plateau of activity.' },
   { id: 'sta', name: 'Southern Taurids', peakSolarLongitude: 223, zhr: 5, radiantRa: 3.47, radiantDec: 15, activeFrom: [9, 10], activeTo: [11, 20], parent: 'Comet 2P/Encke', note: 'Low rates over many weeks, but a well-known source of autumn fireballs.' },
   { id: 'nta', name: 'Northern Taurids', peakSolarLongitude: 230, zhr: 5, radiantRa: 3.87, radiantDec: 22, activeFrom: [10, 20], activeTo: [12, 10], parent: 'Comet 2P/Encke', note: 'The northern branch of the Taurid stream, overlapping the southern one.' },
@@ -53,8 +53,8 @@ export const METEOR_SHOWERS: MeteorShower[] = [
 /**
  * The IMO quotes solar longitudes referred to J2000, while astronomy-engine searches
  * the apparent longitude of date. General precession in longitude is 50.2879 arcsec
- * per year, which is about 0.36 degrees — roughly nine hours of shower timing — a
- * quarter century after J2000, so it is worth correcting.
+ * per year, which is about 0.36 degrees, or roughly nine hours of shower
+ * timing, a quarter century after J2000, so it is worth correcting.
  */
 function solarLongitudeOfDate(j2000Longitude: number, year: number): number {
   return normalizeDegrees(j2000Longitude + (50.2879 * (year - 2000)) / 3600)
@@ -64,7 +64,7 @@ function solarLongitudeOfDate(j2000Longitude: number, year: number): number {
  * Time at which the Sun reaches a given apparent ecliptic longitude during `year`.
  *
  * astronomy-engine's SearchSunLongitude bisects for a sign change in the longitude
- * difference, which wraps every 365 days — so handing it a year-long window makes it
+ * difference, which wraps every 365 days, so handing it a year-long window makes it
  * fail for roughly a third of all target longitudes. Anchoring on the March equinox
  * (where the apparent longitude is zero by definition) and searching a short window
  * around the estimate is both reliable and faster.
@@ -206,7 +206,7 @@ export function getEclipses(from: Date, to: Date, location: GeoLocation): AstroE
         time: time.toISOString(),
         startTime: local?.partial_begin?.time.date.toISOString(),
         endTime: local?.partial_end?.time.date.toISOString(),
-        description: `${capitalise(article(solar.kind))} ${solar.kind} solar eclipse. Never look at a partially eclipsed Sun without a certified solar filter — only totality itself is safe to view with the unaided eye, and only while it lasts.`,
+        description: `${capitalise(article(solar.kind))} ${solar.kind} solar eclipse. Never look at a partially eclipsed Sun without a certified solar filter. Only totality itself is safe to view with the unaided eye, and only while it lasts.`,
         objectIds: ['sun', 'moon'],
         localVisibility: localNote,
         origin: 'calculated'
@@ -260,7 +260,7 @@ function describeLunarEclipse(eclipse: Astronomy.LunarEclipseInfo): string {
 
 const capitalise = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** "a partial" / "an annular" — the eclipse kinds include vowel-initial words. */
+/** "a partial" or "an annular": the eclipse kinds include vowel-initial words. */
 const article = (word: string): string => ('aeiou'.includes(word[0]?.toLowerCase()) ? 'an' : 'a')
 
 // ------------------------------------------------- oppositions + elongations
@@ -278,7 +278,7 @@ export function getPlanetaryEvents(from: Date, to: Date): AstroEvent[] {
           kind: 'opposition',
           title: `${planet} at opposition`,
           time: time.date.toISOString(),
-          description: `${planet} lies opposite the Sun in our sky, so it rises at sunset, is highest around midnight and sets at sunrise. This is also its closest approach for the year, at magnitude ${illum.mag.toFixed(1)} and ${illum.geo_dist.toFixed(2)} AU from Earth — the best time of year to observe it.`,
+          description: `${planet} lies opposite the Sun in our sky, so it rises at sunset, is highest around midnight and sets at sunrise. This is also its closest approach for the year, at magnitude ${illum.mag.toFixed(1)} and ${illum.geo_dist.toFixed(2)} AU from Earth, which makes this the best time of year to observe it.`,
           objectIds: [planet.toLowerCase()],
           localVisibility: 'Visible all night from anywhere the planet rises.',
           origin: 'calculated'
@@ -369,7 +369,7 @@ export function getConjunctions(
                 kind: 'conjunction',
                 title: `${a} and ${b} in conjunction`,
                 time: peak.toISOString(),
-                description: `${a} and ${b} pass within ${sep.toFixed(1)}° of each other — close enough to frame together in binoculars. They are ${elongation.toFixed(0)}° from the Sun at closest approach.`,
+                description: `${a} and ${b} pass within ${sep.toFixed(1)}° of each other, close enough to frame together in binoculars. They are ${elongation.toFixed(0)}° from the Sun at closest approach.`,
                 objectIds: [a.toLowerCase(), b.toLowerCase()],
                 localVisibility: null,
                 origin: 'calculated'
@@ -393,7 +393,7 @@ const DUMMY_OBSERVER = new Astronomy.Observer(0, 0, 0)
 const QUARTER_NAMES = ['New Moon', 'First Quarter', 'Full Moon', 'Last Quarter'] as const
 const QUARTER_NOTES = [
   'The Moon is between Earth and the Sun and is not visible. These are the darkest nights of the month and the best for deep-sky observing.',
-  'Half the disc is lit. The terminator — the line between light and dark — is where craters throw their longest shadows, making this the best phase for lunar detail.',
+  'Half the disc is lit. The terminator, the line between light and dark, is where craters throw their longest shadows, making this the best phase for lunar detail.',
   'The whole disc is lit and the Moon is up all night. Bright, but the flattest lighting of the month, and it washes out fainter objects across the sky.',
   'Half lit again, rising after midnight. Good for early-morning lunar observing and for evening deep-sky work.'
 ] as const
@@ -425,9 +425,9 @@ export function getSeasons(from: Date, to: Date): AstroEvent[] {
     const seasons = Astronomy.Seasons(year)
     const entries: [Astronomy.AstroTime, AstroEventKind, string, string][] = [
       [seasons.mar_equinox, 'equinox', 'March equinox', 'The Sun crosses the celestial equator heading north. Day and night are close to equal everywhere, and the Sun rises due east and sets due west.'],
-      [seasons.jun_solstice, 'solstice', 'June solstice', 'The Sun reaches its northernmost point. Longest day in the northern hemisphere, shortest in the southern — and the shortest observing nights for northern stargazers.'],
+      [seasons.jun_solstice, 'solstice', 'June solstice', 'The Sun reaches its northernmost point. Longest day in the northern hemisphere, shortest in the southern, and the shortest observing nights for northern stargazers.'],
       [seasons.sep_equinox, 'equinox', 'September equinox', 'The Sun crosses back over the celestial equator heading south, again giving nearly equal day and night.'],
-      [seasons.dec_solstice, 'solstice', 'December solstice', 'The Sun reaches its southernmost point. Longest nights in the northern hemisphere — the best stretch of the year for northern observing.']
+      [seasons.dec_solstice, 'solstice', 'December solstice', 'The Sun reaches its southernmost point. Longest nights in the northern hemisphere, and the best stretch of the year for northern observing.']
     ]
     for (const [time, kind, title, description] of entries) {
       if (time.date < from || time.date > to) continue

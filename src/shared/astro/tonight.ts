@@ -134,11 +134,11 @@ export function getMoonSummary(date: Date, location: GeoLocation): { name: strin
 
   let note: string
   if (illumination < 0.15) {
-    note = `${name}, ${Math.round(illumination * 100)}% lit — excellent conditions for faint objects.`
+    note = `${name}, ${Math.round(illumination * 100)}% lit, which is excellent for faint objects.`
   } else if (illumination < 0.5) {
     note = `${name}, ${Math.round(illumination * 100)}% lit. Deep-sky objects are still workable once the Moon sets.`
   } else if (conditions.moonAltitude > 0) {
-    note = `${name}, ${Math.round(illumination * 100)}% lit and above the horizon. Bright moonlight will wash out faint targets — stick to the Moon, planets and bright stars.`
+    note = `${name}, ${Math.round(illumination * 100)}% lit and above the horizon. Bright moonlight will wash out faint targets, so stick to the Moon, planets and bright stars.`
   } else {
     note = `${name}, ${Math.round(illumination * 100)}% lit, but currently below the horizon.`
   }
@@ -166,7 +166,7 @@ export function buildTonightPlan(
   const moonSummary = getMoonSummary(date, location)
 
   let warning: string | null = null
-  if (window.polarDay) warning = 'The Sun does not set at this location today — there is no observable night.'
+  if (window.polarDay) warning = 'The Sun does not set at this location today, so there is no observable night.'
   else if (window.polarNight) warning = 'The Sun does not rise at this location today. It is dark all day, so everything above the horizon is observable.'
   else if (window.neverFullyDark) warning = 'The Sun never drops 18° below the horizon tonight, so the sky stays in astronomical twilight. Faint objects will be difficult.'
 

@@ -2,7 +2,7 @@
  * The renderer's Content Security Policy.
  *
  * Kept out of the main process module so it can be unit-tested: a CSP that is too tight
- * fails silently — the window comes up blank with nothing in the terminal — which is
+ * fails silently. The window comes up blank with nothing in the terminal, which is
  * exactly the kind of regression a test should catch.
  */
 

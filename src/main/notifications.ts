@@ -59,7 +59,7 @@ export class NotificationScheduler {
       minute: '2-digit'
     })
     new Notification({
-      title: `NovaSky — ${event.title}`,
+      title: `NovaSky: ${event.title}`,
       body: `${local} · ${event.localVisibility ?? event.description}`.slice(0, 220),
       silent: false
     }).show()

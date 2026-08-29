@@ -36,7 +36,7 @@ function ActivityCard({ activity }: { activity: Activity }): JSX.Element {
     try {
       const riseSet = getRiseSetTimes(target, time, location)
       if (riseSet.neverRises) return 'This object never rises from your location.'
-      if (riseSet.circumpolar) return 'Circumpolar from your location — it is up every night of the year.'
+      if (riseSet.circumpolar) return 'Circumpolar from your location, so it is up every night of the year.'
       return null
     } catch {
       return null
@@ -193,7 +193,7 @@ function QuizCard({ quiz }: { quiz: Quiz }): JSX.Element {
           <>
             <p className={`text-sm ${passed ? 'text-emerald-300' : 'text-amber-300'}`}>
               {correct} of {quiz.questions.length} correct
-              {passed ? ' — passed.' : ' — have another go.'}
+              {passed ? '. Passed.' : '. Have another go.'}
             </p>
             <button
               type="button"

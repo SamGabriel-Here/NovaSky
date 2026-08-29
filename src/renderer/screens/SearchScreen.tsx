@@ -45,7 +45,7 @@ export function SearchScreen(): JSX.Element {
           title="Search"
           subtitle={
             catalog
-              ? `${catalog.objects.size.toLocaleString()} objects available offline — every star to magnitude ${catalog.manifest.starMagnitudeLimit}, all 88 constellations, the Solar System and ${catalog.deepSky.length.toLocaleString()} deep-sky objects.`
+              ? `${catalog.objects.size.toLocaleString()} objects available offline, every star to magnitude ${catalog.manifest.starMagnitudeLimit}, all 88 constellations, the Solar System and ${catalog.deepSky.length.toLocaleString()} deep-sky objects.`
               : undefined
           }
         />

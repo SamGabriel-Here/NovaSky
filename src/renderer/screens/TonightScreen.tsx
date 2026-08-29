@@ -220,7 +220,7 @@ export function TonightScreen(): JSX.Element {
         />
         <Section
           title="Constellations"
-          hint="Constellations whose centre reaches at least 25° — high enough to trace the whole figure."
+          hint="Constellations whose centre reaches at least 25°, high enough to trace the whole figure."
           entries={plan.constellations}
           empty="Nothing is well placed tonight."
         />

@@ -56,7 +56,7 @@ export function Onboarding(): JSX.Element | null {
           <p className="text-sm leading-relaxed text-slate-300">
             The sky looks different from every point on Earth, so NovaSky needs to know
             roughly where you are to place the horizon and work out what has risen. Your
-            location stays on this computer — there is no account and nothing is uploaded.
+            location stays on this computer. There is no account and nothing is uploaded.
           </p>
           <LocationPicker />
         </div>
@@ -97,7 +97,7 @@ export function Onboarding(): JSX.Element | null {
         <div className="space-y-3 text-sm leading-relaxed text-slate-300">
           <p>
             Press <kbd className="rounded border border-space-600 px-1 font-mono">T</kbd> to open
-            the Time Machine and set the sky to any date — last night, your birthday, or a
+            the Time Machine and set the sky to any date: last night, your birthday, or a
             century from now. Everything updates together: positions, rise and set times,
             visibility and the Tonight list.
           </p>
@@ -135,7 +135,7 @@ export function Onboarding(): JSX.Element | null {
           <p className="text-sm leading-relaxed text-slate-300">
             Beginner mode strips the sky back to the major constellations and the brightest
             stars, with simpler labels. It makes the sky far easier to read when you are
-            starting out — and the Learn screen has guided activities that use it.
+            starting out, and the Learn screen has guided activities that use it.
           </p>
           <div className="rounded-lg border border-space-700 bg-space-900/60 px-3 py-1">
             <Toggle

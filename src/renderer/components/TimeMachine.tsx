@@ -1,9 +1,8 @@
 /**
  * The Time Machine.
  *
- * Sets the moment the sky map draws. Everything downstream — positions, rise and set
- * times, visibility, the Tonight plan — is a pure function of this time and the
- * observer, so changing it here updates the whole app.
+ * Sets the moment the sky map draws. Everything downstream (positions, rise and set
+ * times, visibility, the Tonight plan) is a pure function of this time and the observer, so changing it here updates the whole app.
  */
 import { useMemo, type JSX } from 'react'
 import { Icon } from './Icon'
