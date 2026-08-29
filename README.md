@@ -1,5 +1,7 @@
 # NovaSky
 
+[![CI](https://github.com/SamGabriel-Here/NovaSky/actions/workflows/ci.yml/badge.svg)](https://github.com/SamGabriel-Here/NovaSky/actions/workflows/ci.yml)
+
 A desktop stargazing app for Windows, macOS and Linux. NovaSky draws the real sky above
 your location at any moment in time, tells you what you are looking at, and works
 without a network connection.
@@ -33,6 +35,17 @@ without a network connection.
 - **Offline first** — every catalogue ships with the app. Only satellite tracking needs
   the network, and the UI always says whether data is calculated, from a catalogue,
   live, or cached.
+
+## Downloads
+
+Tagging a release (`git tag v0.1.0 && git push --tags`) builds installers for all three
+platforms in CI and attaches them to the GitHub release: a `.dmg` and `.zip` for macOS,
+an NSIS installer and a portable `.exe` for Windows, and an AppImage and `.deb` for
+Linux.
+
+The macOS builds are unsigned, because there is no Apple Developer certificate in CI, so
+the first launch needs right-click → Open. Building locally with `npm run pack:mac` gives
+the same result.
 
 ## Requirements
 

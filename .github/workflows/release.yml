@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# better-sqlite3 is a native module, so each platform's installer has to be produced
+# on that platform. There is no cross-compiling a working binding.
+jobs:
+  package:
+    name: Package for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            script: pack:mac
+            artifacts: |
+              release/*.dmg
+              release/*.zip
+          - os: windows-latest
+            script: pack:win
+            artifacts: |
+              release/*.exe
+          - os: ubuntu-latest
+            script: pack:linux
+            artifacts: |
+              release/*.AppImage
+              release/*.deb
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package
+        run: npm run ${{ matrix.script }}
+        env:
+          # There is no Apple Developer certificate in CI, so skip signing rather than
+          # failing. The macOS builds are unsigned and need right-click to open.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: novasky-${{ matrix.os }}
+          path: ${{ matrix.artifacts }}
+          if-no-files-found: error
+
+  release:
+    name: Attach to the GitHub release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all builds
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "NovaSky ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            $(find dist -type f | sort)
