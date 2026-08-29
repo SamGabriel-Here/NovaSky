@@ -3,9 +3,9 @@
 NovaSky is a dark, quiet interface built to be used at night, next to a telescope, by
 someone whose eyes are dark-adapted. Every decision below follows from that.
 
-The screens below are captures of the running application, not mockups — they are
-regenerated from the real app by `npx electron scripts/capture.cjs` after
-`npm run build --mode development`, so they cannot drift out of date.
+The screens below are captures of the running application, not mockups. They are
+regenerated from the real app with `npm run capture`, which drives it through every
+screen and asserts nothing threw along the way, so they cannot quietly drift out of date.
 
 ## Principles
 

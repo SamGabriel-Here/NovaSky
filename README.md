@@ -179,6 +179,7 @@ its own check. It reports the number of attempted requests; the expected answer 
 
 ```
 novasky/
+├── .github/workflows/       # CI: type-check, test, build and boot on all three OSes
 ├── scripts/build-data.mjs   # downloads and reduces the source catalogues
 ├── resources/data/          # the offline catalogues that ship with the app
 ├── src/
@@ -186,7 +187,7 @@ novasky/
 │   ├── preload/             # the single, audited bridge into the renderer
 │   ├── renderer/            # React UI and the Three.js sky map
 │   └── shared/              # astronomy, catalogue model and types, used by both
-├── tests/                   # astronomy and UI tests
+├── tests/                   # astronomy, renderer geometry, CSP and UI tests
 └── docs/                    # data sources, design, and how to extend the app
 ```
 
