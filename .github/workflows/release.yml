@@ -73,8 +73,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Installer names contain spaces ("NovaSky Setup 0.1.0.exe"), so read them
+          # into an array rather than letting the shell split the file list.
+          mapfile -t files < <(find dist -type f | sort)
+          printf 'attaching %s\n' "${files[@]}"
           gh release create "${GITHUB_REF_NAME}" \
             --title "NovaSky ${GITHUB_REF_NAME}" \
             --generate-notes \
             --verify-tag \
-            $(find dist -type f | sort)
+            "${files[@]}"
