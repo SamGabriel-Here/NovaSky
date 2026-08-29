@@ -13,11 +13,13 @@ import type {
   Bootstrap,
   LessonProgress,
   NetworkStatus,
+  ObjectImage,
   Settings,
   TleBundle
 } from '../shared/types'
 import { loadCatalog } from './catalog'
 import { getNetworkStatus, getTleBundle } from './network'
+import { getObjectImage, readSkyImage, type ObjectImageRequest } from './imagery'
 import type { NotificationScheduler } from './notifications'
 import type { Store } from './store'
 
@@ -79,6 +81,32 @@ export function registerIpc(context: IpcContext): void {
   )
 
   ipcMain.handle('network:status', (): NetworkStatus => getNetworkStatus())
+
+  // The bundled all-sky panorama, sent once as raw bytes. The renderer turns it into a
+  // blob URL, which keeps the image-src CSP tight and avoids a 6 MB base64 string.
+  ipcMain.handle('imagery:sky', (): Uint8Array | null => {
+    const image = readSkyImage()
+    return image ? new Uint8Array(image) : null
+  })
+
+  ipcMain.handle(
+    'imagery:object',
+    async (_event, request: ObjectImageRequest): Promise<ObjectImage> => {
+      const settings = store.getSettings()
+      if (!settings.showObjectImagery) {
+        return {
+          objectId: request.objectId,
+          fovDegrees: request.fovDegrees,
+          data: null,
+          origin: 'cached',
+          fetchedAt: null,
+          source: null,
+          warning: 'Survey imagery is turned off in Settings.'
+        }
+      }
+      return getObjectImage(store, request, { allowNetwork: settings.allowNetwork })
+    }
+  )
 
   ipcMain.handle('notifications:enable', (_event, enabled: boolean): Settings => {
     const settings = store.saveSettings({ notificationsEnabled: enabled })

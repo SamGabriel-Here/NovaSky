@@ -7,7 +7,8 @@
 │  index.ts     window, menu, CSP, permissions       │
 │  store.ts     SQLite (JSON fallback) in userData   │
 │  catalog.ts   reads resources/data from disk       │
-│  network.ts   the only outbound request: CelesTrak │
+│  network.ts   outbound: CelesTrak orbital elements │
+│  imagery.ts   bundled panorama + survey cutouts    │
 │  notifications.ts  opt-in event scheduler          │
 │  ipc.ts       every privileged operation, in one file
 └───────────────┬────────────────────────────────────┘
@@ -59,6 +60,16 @@ group in the observer's frame, so they stay still while the sky turns above them
 
 Solar-System bodies are the exception: they move, so their vertices are rewritten
 whenever the time changes — ten objects, not ten thousand.
+
+Imagery rides on the same frame. The all-sky panorama is an inverted sphere inside the
+sky group, so it turns with the sky for free; its shader rotates each view direction into
+galactic coordinates to sample the equirectangular image. Survey cutouts are meshes whose
+vertices are computed from the gnomonic projection the survey delivers, which is what
+makes them land registered with the catalogue stars.
+
+The ground is a hemisphere, not a disc. The camera sits at the origin, and a horizontal
+plane containing the eye projects to a line rather than a filled region — a disc occludes
+nothing at all.
 
 Picking is a dot product of the click ray against every candidate, with the ray rotated
 into the sky group's frame first. Ten thousand dot products per click is far cheaper and

@@ -11,8 +11,10 @@
  * they stay put while the sky turns above them.
  */
 import * as THREE from 'three'
+import * as Astronomy from 'astronomy-engine'
 import type { GeoLocation, ObjectKind, SkyObject } from '@shared/types'
 import {
+  DEG,
   type Vec3,
   applyMatrix3,
   azimuthToCardinal,
@@ -36,6 +38,8 @@ export interface SkyOptions {
   showDeepSky: boolean
   showBlackHoles: boolean
   showMilkyWay: boolean
+  showSkyImagery: boolean
+  showObjectImagery: boolean
   showSatellites: boolean
   beginnerMode: boolean
 }
@@ -121,6 +125,71 @@ const SKY_ORIENTATION = /* glsl */ `
     vec2 s0 = c0.xy / c0.w;
     northScreen = normalize((cN.xy / cN.w - s0) * vec2(aspect, 1.0));
     eastScreen = normalize((cE.xy / cE.w - s0) * vec2(aspect, 1.0));
+  }
+`
+
+/**
+ * The all-sky photograph.
+ *
+ * Drawn on a large inverted sphere inside the sky group, so it is already in the J2000
+ * equatorial frame and follows the sky as it turns. The panorama itself is stored in
+ * galactic coordinates, so the fragment shader rotates each view direction into that
+ * frame with a matrix supplied by astronomy-engine and samples the equirectangular
+ * image directly. Nothing about the alignment is guessed.
+ */
+const SKY_IMAGE_VERTEX = /* glsl */ `
+  varying vec3 vDirection;
+  void main() {
+    vDirection = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const SKY_IMAGE_FRAGMENT = /* glsl */ `
+  uniform sampler2D panorama;
+  uniform mat3 equatorialToGalactic;
+  uniform float intensity;
+  varying vec3 vDirection;
+
+  const float PI = 3.14159265358979;
+
+  void main() {
+    vec3 galactic = normalize(equatorialToGalactic * normalize(vDirection));
+    float latitude = asin(clamp(galactic.z, -1.0, 1.0));
+    float longitude = atan(galactic.y, galactic.x);
+
+    // Galactic longitude increases to the left in the panorama, and latitude runs from
+    // +90 at the top down to -90 at the bottom.
+    vec2 uv = vec2(0.5 - longitude / (2.0 * PI), 0.5 - latitude / PI);
+
+    vec3 colour = texture2D(panorama, uv).rgb;
+    // The photograph is a backdrop, not the subject: hold it well below the computed
+    // stars so labels and markers stay legible on top of it.
+    gl_FragColor = vec4(colour * intensity, 1.0);
+  }
+`
+
+/** A survey cutout, drawn on a mesh whose vertices carry the real sky positions. */
+const OBJECT_IMAGE_VERTEX = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const OBJECT_IMAGE_FRAGMENT = /* glsl */ `
+  uniform sampler2D cutout;
+  uniform float opacity;
+  varying vec2 vUv;
+
+  void main() {
+    vec3 colour = texture2D(cutout, vUv).rgb;
+    // Feather the border so the cutout blends into the surrounding sky instead of
+    // ending at a hard square edge.
+    vec2 edge = min(vUv, 1.0 - vUv);
+    float fade = smoothstep(0.0, 0.06, min(edge.x, edge.y));
+    gl_FragColor = vec4(colour, opacity * fade);
   }
 `
 
@@ -482,6 +551,9 @@ export class SkyRenderer {
   private nebulae: THREE.Points | null = null
   private blackHoles: THREE.Points | null = null
   private moon: THREE.Points | null = null
+  private skyImage: THREE.Mesh | null = null
+  private objectImage: THREE.Mesh | null = null
+  private objectImageId: string | null = null
   private blackHoleObjects: SkyObject[] = []
   private starObjects: SkyObject[] = []
   private constellationLines: THREE.LineSegments | null = null
@@ -599,6 +671,8 @@ export class SkyRenderer {
     if (this.nebulae) this.nebulae.visible = options.showDeepSky
     if (this.blackHoles) this.blackHoles.visible = options.showBlackHoles
     if (this.faintStars) this.faintStars.visible = options.showMilkyWay
+    if (this.skyImage) this.skyImage.visible = options.showSkyImagery
+    if (this.objectImage) this.objectImage.visible = options.showObjectImagery
     if (this.horizon) this.horizon.visible = options.showHorizon
     if (this.grid) this.grid.visible = options.showGrid
     if (this.satellitePoints) this.satellitePoints.visible = options.showSatellites
@@ -753,6 +827,104 @@ export class SkyRenderer {
     this.stars = new THREE.Points(geometry, material)
     this.stars.frustumCulled = false
     this.skyGroup.add(this.stars)
+  }
+
+  /**
+   * Installs the bundled all-sky photograph. Called once, with the JPEG bytes handed
+   * over from the main process.
+   */
+  setSkyImage(bytes: Uint8Array): void {
+    if (this.skyImage) {
+      this.skyGroup.remove(this.skyImage)
+      this.skyImage.geometry.dispose()
+      ;(this.skyImage.material as THREE.Material).dispose()
+      this.skyImage = null
+    }
+    if (bytes.byteLength === 0) return
+
+    const { texture, release } = loadJpegTexture(bytes)
+    texture.colorSpace = THREE.SRGBColorSpace
+    void release
+    // No mipmaps: the sampler wraps in longitude, and mipmapped wrapping produces a
+    // visible seam down the anti-centre of the galaxy.
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
+    texture.generateMipmaps = false
+    texture.wrapS = THREE.RepeatWrapping
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: SKY_IMAGE_VERTEX,
+      fragmentShader: SKY_IMAGE_FRAGMENT,
+      side: THREE.BackSide,
+      depthWrite: false,
+      depthTest: false,
+      uniforms: {
+        panorama: { value: texture },
+        equatorialToGalactic: { value: equatorialToGalacticMatrix() },
+        intensity: { value: SKY_IMAGE_INTENSITY }
+      }
+    })
+
+    // Just inside the objects, and drawn before everything else.
+    this.skyImage = new THREE.Mesh(new THREE.SphereGeometry(SKY_RADIUS * 0.98, 64, 32), material)
+    this.skyImage.frustumCulled = false
+    this.skyImage.renderOrder = -10
+    this.skyImage.visible = this.options.showSkyImagery
+    this.skyGroup.add(this.skyImage)
+  }
+
+  /**
+   * Places a survey cutout on the sky.
+   *
+   * The mesh is built from the image's own projection: a gnomonic (TAN) cutout with
+   * north up and east left. Each vertex is converted from its pixel position to a real
+   * J2000 direction, so the image lands at the object's true position, scale and
+   * orientation and stays registered with the catalogue stars drawn on top of it.
+   */
+  setObjectImage(
+    objectId: string | null,
+    bytes: Uint8Array | null,
+    raHours: number,
+    decDegrees: number,
+    fovDegrees: number
+  ): void {
+    if (this.objectImage) {
+      this.skyGroup.remove(this.objectImage)
+      this.objectImage.geometry.dispose()
+      ;(this.objectImage.material as THREE.Material).dispose()
+      this.objectImage = null
+    }
+    this.objectImageId = objectId
+    if (!objectId || !bytes || bytes.byteLength === 0) return
+
+    const { texture } = loadJpegTexture(bytes)
+    texture.colorSpace = THREE.SRGBColorSpace
+
+    const material = new THREE.ShaderMaterial({
+      vertexShader: OBJECT_IMAGE_VERTEX,
+      fragmentShader: OBJECT_IMAGE_FRAGMENT,
+      transparent: true,
+      depthWrite: false,
+      uniforms: {
+        cutout: { value: texture },
+        opacity: { value: 1 }
+      }
+    })
+
+    this.objectImage = new THREE.Mesh(
+      buildCutoutGeometry(raHours, decDegrees, fovDegrees),
+      material
+    )
+    this.objectImage.frustumCulled = false
+    // Above the panorama and the nebula glows, below the star points and markers.
+    this.objectImage.renderOrder = -3
+    this.objectImage.visible = this.options.showObjectImagery
+    this.skyGroup.add(this.objectImage)
+  }
+
+  /** Which object currently has a cutout on screen, if any. */
+  getObjectImageId(): string | null {
+    return this.objectImageId
   }
 
   /**
@@ -1280,20 +1452,24 @@ export class SkyRenderer {
   private buildHorizon(): void {
     const group = new THREE.Group()
 
-    // Ground: a large, mostly opaque disc. Slight transparency keeps objects below the
-    // horizon faintly visible, which helps when planning what is about to rise.
+    // Ground: the lower half of the celestial sphere, seen from inside.
+    //
+    // This has to be a hemisphere rather than a disc. The camera sits at the origin,
+    // which is *in* the plane of any horizontal disc, and a plane containing the eye
+    // projects to a line rather than a filled region — so a disc occludes nothing at
+    // all. The slight transparency keeps objects below the horizon faintly visible,
+    // which helps when working out what is about to rise.
     const ground = new THREE.Mesh(
-      new THREE.CircleGeometry(SKY_RADIUS * 1.5, 96),
+      new THREE.SphereGeometry(SKY_RADIUS * 0.96, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
       new THREE.MeshBasicMaterial({
         color: 0x070b16,
         transparent: true,
         opacity: 0.93,
-        side: THREE.DoubleSide,
+        side: THREE.BackSide,
         depthWrite: false
       })
     )
-    ground.rotation.x = -Math.PI / 2
-    ground.renderOrder = 2
+    ground.renderOrder = 3
     group.add(ground)
 
     // Horizon ring.
@@ -1308,7 +1484,7 @@ export class SkyRenderer {
       ringGeometry,
       new THREE.LineBasicMaterial({ color: 0x5a7bb8, transparent: true, opacity: 0.75 })
     )
-    ring.renderOrder = 3
+    ring.renderOrder = 4
     group.add(ring)
 
     // Tick marks every 10 degrees of azimuth.
@@ -1326,7 +1502,7 @@ export class SkyRenderer {
       tickGeometry,
       new THREE.LineBasicMaterial({ color: 0x5a7bb8, transparent: true, opacity: 0.5 })
     )
-    tickLines.renderOrder = 3
+    tickLines.renderOrder = 4
     group.add(tickLines)
 
     group.visible = this.options.showHorizon
@@ -1541,12 +1717,15 @@ export class SkyRenderer {
       const worldY = vector.y
       vector.multiplyScalar(SKY_RADIUS).project(this.camera)
 
+      const screenY = ((1 - vector.y) / 2) * height
       const visible =
         vector.z < 1 &&
         vector.x >= -1 &&
         vector.x <= 1 &&
         vector.y >= -1 &&
         vector.y <= 1 &&
+        // Keep clear of the layer chips along the top edge.
+        screenY > LABEL_TOP_INSET &&
         // Hide labels for objects under the ground, except the compass points.
         (target.kind === 'cardinal' || worldY > -0.02)
 
@@ -1649,6 +1828,16 @@ export class SkyRenderer {
       if (uniforms.aspect) uniforms.aspect.value = aspect
       if (uniforms.twinkle) uniforms.twinkle.value = this.animate
       if (uniforms.animate) uniforms.animate.value = this.animate
+    }
+
+    if (this.skyImage) {
+      // The panorama is 4000 pixels across the whole sky, so past roughly a 30-degree
+      // field it is being magnified past its resolution and turns to blur. Fade it out
+      // as the field narrows; survey cutouts take over from there.
+      const { uniforms } = this.skyImage.material as THREE.ShaderMaterial
+      const fade = smoothstep(12, 34, this.cameraState.fov)
+      uniforms.intensity.value = SKY_IMAGE_INTENSITY * fade
+      this.skyImage.visible = this.options.showSkyImagery && fade > 0.01
     }
 
     if (this.deepSkyPoints) {
@@ -1781,6 +1970,119 @@ export class SkyRenderer {
     this.canvas.removeEventListener('pointercancel', this.onPointerUp)
     this.canvas.removeEventListener('wheel', this.onWheel)
   }
+}
+
+/**
+ * Turns raw JPEG bytes into a texture via a blob URL, which keeps `img-src` in the
+ * Content Security Policy limited to `blob:` rather than opening it up to the
+ * filesystem. The URL is revoked as soon as the decode completes.
+ */
+function loadJpegTexture(bytes: Uint8Array): { texture: THREE.Texture; release: () => void } {
+  // Copy into a plain ArrayBuffer: the transferred view may sit inside a larger buffer.
+  const copy = new Uint8Array(bytes.byteLength)
+  copy.set(bytes)
+  const url = URL.createObjectURL(new Blob([copy.buffer], { type: 'image/jpeg' }))
+  const release = (): void => URL.revokeObjectURL(url)
+  const texture = new THREE.TextureLoader().load(url, release, undefined, release)
+  return { texture, release }
+}
+
+/** Labels are suppressed under the layer chips that run along the top of the map. */
+const LABEL_TOP_INSET = 52
+
+/** How far the all-sky photograph is held below the computed sky. */
+const SKY_IMAGE_INTENSITY = 0.62
+
+/** Hermite ramp from 0 at `edge0` to 1 at `edge1`, matching the GLSL builtin. */
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)))
+  return t * t * (3 - 2 * t)
+}
+
+/**
+ * Row-major EQJ -> galactic rotation, as a Three.js Matrix3.
+ *
+ * astronomy-engine returns a column-major 3x3, so the indices are transposed here.
+ */
+export function equatorialToGalacticMatrix(): THREE.Matrix3 {
+  const rotation = Astronomy.Rotation_EQJ_GAL()
+  const m = (row: number, col: number): number => rotation.rot[col][row]
+  return new THREE.Matrix3().set(
+    m(0, 0), m(0, 1), m(0, 2),
+    m(1, 0), m(1, 1), m(1, 2),
+    m(2, 0), m(2, 1), m(2, 2)
+  )
+}
+
+/**
+ * Builds the mesh for a gnomonic sky cutout.
+ *
+ * For a TAN projection centred on `(raHours, decDegrees)` and spanning `fovDegrees`,
+ * a point at normalised image coordinates (u, v) lies along
+ *
+ *     direction = normalise(centre + xi * east + eta * north)
+ *
+ * with `xi` and `eta` the tangent-plane offsets. East runs to the *left* in the image,
+ * which is the standard astronomical orientation these services return, and north is up.
+ */
+export function buildCutoutGeometry(
+  raHours: number,
+  decDegrees: number,
+  fovDegrees: number,
+  segments = 24
+): THREE.BufferGeometry {
+  const centre = eqjUnitVector(raHours, decDegrees)
+  const c = new THREE.Vector3(centre.x, centre.y, centre.z).normalize()
+  const pole = new THREE.Vector3(0, 0, 1)
+
+  // East is the direction of increasing right ascension; north is the pole projected
+  // onto the tangent plane.
+  const east = new THREE.Vector3().crossVectors(pole, c)
+  east.lengthSq() < 1e-12 ? east.set(1, 0, 0) : east.normalize()
+  const north = pole.clone().addScaledVector(c, -pole.dot(c))
+  north.lengthSq() < 1e-12 ? north.set(0, 1, 0) : north.normalize()
+
+  const halfAngle = Math.tan((fovDegrees / 2) * DEG)
+  const positions: number[] = []
+  const uvs: number[] = []
+  const indices: number[] = []
+
+  for (let row = 0; row <= segments; row++) {
+    for (let column = 0; column <= segments; column++) {
+      const u = column / segments
+      const v = row / segments
+      // Image x runs right, but east is to the left, hence the negation.
+      const xi = -(u - 0.5) * 2 * halfAngle
+      const eta = (0.5 - v) * 2 * halfAngle
+
+      const direction = c
+        .clone()
+        .addScaledVector(east, xi)
+        .addScaledVector(north, eta)
+        .normalize()
+        .multiplyScalar(SKY_RADIUS * 0.995)
+
+      positions.push(direction.x, direction.y, direction.z)
+      uvs.push(u, 1 - v)
+    }
+  }
+
+  const stride = segments + 1
+  for (let row = 0; row < segments; row++) {
+    for (let column = 0; column < segments; column++) {
+      const a = row * stride + column
+      const b = a + 1
+      const d = a + stride
+      const e = d + 1
+      indices.push(a, d, b, b, d, e)
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  return geometry
 }
 
 /** Nudges labels clear of the marker they belong to. */

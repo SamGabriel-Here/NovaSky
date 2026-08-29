@@ -100,6 +100,51 @@ asks the operating system for GPS.
 
 Licence: MIT.
 
+## Imagery
+
+Imagery is the one category of data in NovaSky that is *pictures* rather than
+measurements. It is never used to derive a position, a magnitude or a time — those
+always come from the catalogues and the ephemeris — and the UI labels it separately.
+
+### All-sky panorama — ESO GigaGalaxy Zoom
+
+<https://www.eso.org/public/images/eso0932a/>
+
+A 4000x2000 photographic mosaic of the entire sky by Serge Brunier, equirectangular in
+galactic coordinates. It ships with the app (4.6 MB) and provides the dust lanes, the
+Great Rift and the nebulosity of the Milky Way, which no star catalogue can supply.
+
+Nothing about its alignment is assumed. The fragment shader converts each view direction
+into galactic coordinates using the rotation matrix from `Astronomy.Rotation_EQJ_GAL()`
+and samples the panorama directly, so the image registers against the computed sky by
+construction. `tests/renderer/geometry.test.ts` checks that transform against Sagittarius
+A* and the north galactic pole.
+
+The panorama fades out below a 34-degree field of view: 4000 pixels across 360 degrees
+is about 5.4 arcminutes per pixel, so past that point it is being magnified beyond its
+resolution and survey cutouts take over.
+
+Credit: ESO/S. Brunier. Licence: CC BY 4.0.
+
+### Deep-sky cutouts — Digitized Sky Survey
+
+Fetched on demand from CDS's `hips2fits` service (DSS2 colour), with NASA SkyView as a
+fallback. Zooming in on a selected deep-sky object below a 6-degree field requests a
+512-pixel gnomonic cutout matched to the current view, which is then placed on the
+celestial sphere at the object's true position, scale and orientation.
+
+The mesh is built from the projection the service delivers — TAN, north up, east left —
+so the photograph lands registered with the catalogue stars drawn on top of it. That
+registration is the check that the orientation is right, and it is asserted in
+`tests/renderer/geometry.test.ts`.
+
+Cutouts are cached in the local database, so an object you have already looked at works
+offline afterwards. Nothing is fetched when `allowNetwork` is off, and the sky map falls
+back to its computed rendering whenever an image is unavailable.
+
+Credit: Digitized Sky Survey, served by CDS/Aladin and NASA SkyView. See the DSS
+copyright notice at <https://archive.stsci.edu/dss/copyright.html>.
+
 ## Calculated values
 
 ### Ephemeris — astronomy-engine

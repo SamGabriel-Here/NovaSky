@@ -12,6 +12,19 @@ import { useAppStore, useEffectiveSettings } from '../state/useAppStore'
 import { Icon } from '../components/Icon'
 import { Tooltip } from '../components/ui'
 
+/** Below this field of view a selected deep-sky object is worth a real survey image. */
+const OBJECT_IMAGERY_FOV = 6
+
+const roundToStep = (value: number, step: number): number => Math.round(value / step) * step
+
+/** Decodes the base64 JPEG the main process sends back. */
+function base64ToBytes(encoded: string): Uint8Array {
+  const binary = atob(encoded)
+  const bytes = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+  return bytes
+}
+
 export function SkyCanvas(): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const overlayRef = useRef<HTMLDivElement>(null)
@@ -38,6 +51,8 @@ export function SkyCanvas(): JSX.Element {
     showDeepSky: settings.showDeepSky,
     showBlackHoles: settings.showBlackHoles,
     showMilkyWay: settings.showMilkyWay,
+    showSkyImagery: settings.showSkyImagery,
+    showObjectImagery: settings.showObjectImagery,
     showSatellites: settings.showSatellites,
     beginnerMode: settings.beginnerMode
   }
@@ -95,6 +110,8 @@ export function SkyCanvas(): JSX.Element {
     settings.showDeepSky,
     settings.showBlackHoles,
     settings.showMilkyWay,
+    settings.showSkyImagery,
+    settings.showObjectImagery,
     settings.showSatellites,
     settings.beginnerMode
   ])
@@ -109,6 +126,87 @@ export function SkyCanvas(): JSX.Element {
     const object = catalog.objects.get(focusRequest.id)
     if (object) rendererRef.current?.focusOnObject(object)
   }, [focusRequest, catalog])
+
+  // The bundled all-sky photograph: fetched once, over IPC, as raw bytes.
+  useEffect(() => {
+    let cancelled = false
+    void window.novasky
+      .getSkyImage()
+      .then((bytes) => {
+        if (!cancelled && bytes) rendererRef.current?.setSkyImage(bytes)
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  /**
+   * Survey cutouts.
+   *
+   * Zooming past the threshold on a selected deep-sky object asks the main process for
+   * a real image of it, sized to the current field of view. The request is debounced so
+   * that a continuous zoom produces one download rather than dozens, and the result is
+   * cached locally, so returning to the same object is instant and works offline.
+   */
+  const [imageryNote, setImageryNote] = useState<string | null>(null)
+  useEffect(() => {
+    if (!settings.showObjectImagery || !catalog || !selectedId) {
+      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+      setImageryNote(null)
+      return
+    }
+    const object = catalog.objects.get(selectedId)
+    // Only fixed, extended objects are worth a cutout; planets move and stars are points.
+    if (!object || object.kind !== 'deep-sky' || object.ra === null || object.dec === null) {
+      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+      setImageryNote(null)
+      return
+    }
+    if (camera.fov > OBJECT_IMAGERY_FOV) {
+      rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+      setImageryNote(null)
+      return
+    }
+
+    // Quantise the requested field so small zoom changes reuse the same cached cutout.
+    const size = Math.min(OBJECT_IMAGERY_FOV, Math.max(0.15, roundToStep(camera.fov * 0.8, 0.25)))
+    let cancelled = false
+    const timer = setTimeout(() => {
+      void window.novasky
+        .getObjectImage({
+          objectId: object.id,
+          raDegrees: (object.ra as number) * 15,
+          decDegrees: object.dec as number,
+          fovDegrees: size
+        })
+        .then((image) => {
+          if (cancelled) return
+          if (image.data) {
+            const bytes = base64ToBytes(image.data)
+            rendererRef.current?.setObjectImage(
+              object.id,
+              bytes,
+              object.ra as number,
+              object.dec as number,
+              size
+            )
+            setImageryNote(
+              `${object.name}: ${image.source ?? 'survey image'} · ${image.origin}`
+            )
+          } else {
+            rendererRef.current?.setObjectImage(null, null, 0, 0, 0)
+            setImageryNote(image.warning)
+          }
+        })
+        .catch(() => undefined)
+    }, 400)
+
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
+  }, [selectedId, camera.fov, settings.showObjectImagery, catalog])
 
   // Satellite positions move fast enough to need their own refresh loop.
   useEffect(() => {
@@ -182,6 +280,12 @@ export function SkyCanvas(): JSX.Element {
         tabIndex={0}
       />
       <div ref={overlayRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />
+
+      {imageryNote && (
+        <div className="pointer-events-none absolute bottom-3 left-1/2 max-w-[60%] -translate-x-1/2 truncate rounded-lg border border-space-700/70 bg-space-950/80 px-3 py-1.5 text-[11px] text-slate-300 backdrop-blur">
+          {imageryNote}
+        </div>
+      )}
 
       {/* Lifted clear of the Time Machine panel while it is open. */}
       <div

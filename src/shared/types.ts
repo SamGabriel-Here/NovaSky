@@ -220,6 +220,10 @@ export interface Settings {
   showBlackHoles: boolean
   /** The faint-star layer whose density traces the Milky Way. */
   showMilkyWay: boolean
+  /** The bundled all-sky photograph behind the computed sky. */
+  showSkyImagery: boolean
+  /** Survey cutouts fetched for individual objects when you zoom in. */
+  showObjectImagery: boolean
   showSatellites: boolean
   starMagnitudeLimit: number
   notificationsEnabled: boolean
@@ -261,6 +265,18 @@ export interface Bootstrap {
   appVersion: string
   /** Best guess at the user's IANA time zone, read from the operating system. */
   systemTimeZone: string
+}
+
+/** A survey cutout for one object. `data` is base64-encoded JPEG, or null when absent. */
+export interface ObjectImage {
+  objectId: string
+  fovDegrees: number
+  data: string | null
+  origin: DataOrigin
+  fetchedAt: string | null
+  /** Human-readable attribution, shown in the details panel. */
+  source: string | null
+  warning: string | null
 }
 
 export interface NetworkStatus {

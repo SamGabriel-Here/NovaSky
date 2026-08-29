@@ -165,6 +165,20 @@ portion carries a hint of earthshine.
 
 ![A waxing crescent](screenshots/12-moon.png)
 
+**Photography** is layered underneath everything computed. The all-sky panorama supplies
+the dust and nebulosity of the Milky Way that no catalogue contains, held well below the
+computed sky so labels stay legible, and faded out once the field narrows past the
+panorama's own resolution.
+
+![The galactic centre with the photographic sky](screenshots/14-photo-sky.png)
+
+Zooming in on a deep-sky object replaces the computed glow with a real survey image of
+it, positioned and oriented from the projection the survey delivers. The proof that the
+registration is right is visible in the picture: the catalogue star points sit exactly on
+the stars in the photograph.
+
+![A survey image of the Orion Nebula in place](screenshots/15-object-photo.png)
+
 **Black holes** get a deliberately symbolic mark — a dark shadow inside a slowly turning,
 Doppler-brightened accretion ring. Nothing about a black hole is visible at these
 scales, and the details panel says so; the marker exists to show *where* they are.

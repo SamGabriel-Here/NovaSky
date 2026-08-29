@@ -39,7 +39,10 @@ const SOURCES = {
   // system time zone, and to back the "nearest city" location picker.
   tzMeta: 'https://raw.githubusercontent.com/moment/moment-timezone/develop/data/meta/latest.json',
   // Positions for the black-hole systems are queried live from SIMBAD's TAP service.
-  simbadTap: 'https://simbad.cds.unistra.fr/simbad/sim-tap/sync'
+  simbadTap: 'https://simbad.cds.unistra.fr/simbad/sim-tap/sync',
+  // ESO GigaGalaxy Zoom all-sky panorama by Serge Brunier: a photographic mosaic of the
+  // whole sky, equirectangular in galactic coordinates. CC BY 4.0.
+  milkyWay: 'https://cdn.eso.org/images/publicationjpg/eso0932a.jpg'
 }
 
 /** Magnitude cut for the shipped star catalogue. 6.5 ~ naked-eye limit in dark skies. */
@@ -307,6 +310,25 @@ async function buildDeepSky() {
   return out
 }
 
+// ------------------------------------------------------------- imagery
+
+/**
+ * The all-sky photograph used as the sky-map background.
+ *
+ * This is the one bundled asset that is imagery rather than measurements, so the app
+ * labels it as such. It is 4000x2000, equirectangular, in galactic coordinates:
+ * longitude across, latitude down, with the galactic centre in the middle. The renderer
+ * converts each view direction to galactic coordinates with astronomy-engine and
+ * samples it directly, so no assumption about alignment is baked into the file.
+ */
+async function buildSkyImage() {
+  const file = await download(SOURCES.milkyWay, 'eso0932a.jpg')
+  const bytes = await readFile(file)
+  await writeFile(path.join(OUT, 'milkyway.jpg'), bytes)
+  console.log(`  imagery ESO all-sky panorama (${(bytes.length / 1e6).toFixed(1)} MB)`)
+  return bytes.length
+}
+
 // --------------------------------------------------------- black holes
 
 /**
@@ -455,6 +477,7 @@ async function main() {
   const cons = await buildConstellations()
   const dso = await buildDeepSky()
   const blackHoles = await buildBlackHoles()
+  const skyImageBytes = await buildSkyImage()
   const places = await buildPlaces()
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -467,13 +490,14 @@ async function main() {
       constellations: cons.length,
       deepSky: dso.length,
       blackHoles: blackHoles.length,
+      skyImageBytes,
       places: places.length
     },
     sources: SOURCES
   }
   await writeFile(path.join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 2))
   console.log(
-    '  wrote   resources/data/{stars,stars-faint,constellations,deepsky,blackholes,places,manifest}.json'
+    '  wrote   resources/data/{stars,stars-faint,constellations,deepsky,blackholes,places,manifest}.json + milkyway.jpg'
   )
 }
 

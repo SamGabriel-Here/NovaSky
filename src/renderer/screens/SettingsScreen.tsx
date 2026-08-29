@@ -114,6 +114,18 @@ export function SettingsScreen(): JSX.Element {
               description="Adds 74 000 telescopic stars. The band you see is their real density along the galactic plane, not a painted texture."
             />
             <Toggle
+              checked={settings.showSkyImagery}
+              onChange={(value) => void updateSettings({ showSkyImagery: value })}
+              label="Photographic sky"
+              description="The ESO GigaGalaxy Zoom all-sky panorama behind the computed sky. Bundled with the app, so it works offline."
+            />
+            <Toggle
+              checked={settings.showObjectImagery}
+              onChange={(value) => void updateSettings({ showObjectImagery: value })}
+              label="Deep-sky survey photos"
+              description="Zooming in on a selected deep-sky object loads a real image of it from the DSS survey, placed at its true position and orientation. Downloaded once, then cached."
+            />
+            <Toggle
               checked={settings.showHorizon}
               onChange={(value) => void updateSettings({ showHorizon: value })}
               label="Horizon and compass points"
@@ -287,6 +299,11 @@ export function SettingsScreen(): JSX.Element {
           </div>
 
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
+            Imagery credits: all-sky panorama © ESO/S. Brunier, CC BY 4.0. Deep-sky
+            photographs from the Digitized Sky Survey, served by CDS/Aladin and NASA
+            SkyView.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-slate-500">
             NovaSky has no account system and no telemetry. Your location, settings and learning
             progress live only in the app's data folder on this machine.
           </p>
@@ -321,7 +338,7 @@ export function SettingsScreen(): JSX.Element {
             <button type="button" onClick={reopenOnboarding} className="text-nova-300 hover:text-nova-200">
               Replay the introduction
             </button>
-            <Tooltip label="Star positions: HYG v4.1 (Hipparcos/Yale/Gliese). Deep sky: OpenNGC. Constellation figures: d3-celestial. Ephemeris: astronomy-engine. Satellites: CelesTrak.">
+            <Tooltip label="Star positions: HYG v4.1 (Hipparcos/Yale/Gliese). Deep sky: OpenNGC. Constellation figures: d3-celestial. Black holes: SIMBAD. Ephemeris: astronomy-engine. Satellites: CelesTrak. All-sky photograph: ESO/S. Brunier (CC BY 4.0). Deep-sky photographs: Digitized Sky Survey via CDS/Aladin and NASA SkyView.">
               <span className="inline-flex items-center gap-1 text-slate-400">
                 <Icon name="info" size={13} />
                 Data sources

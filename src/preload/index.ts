@@ -11,6 +11,7 @@ import type {
   Bootstrap,
   LessonProgress,
   NetworkStatus,
+  ObjectImage,
   Settings,
   TleBundle
 } from '../shared/types'
@@ -26,6 +27,13 @@ const api = {
   getTle: (options: { force?: boolean } = {}): Promise<TleBundle> =>
     ipcRenderer.invoke('satellites:tle', options),
   networkStatus: (): Promise<NetworkStatus> => ipcRenderer.invoke('network:status'),
+  getSkyImage: (): Promise<Uint8Array | null> => ipcRenderer.invoke('imagery:sky'),
+  getObjectImage: (request: {
+    objectId: string
+    raDegrees: number
+    decDegrees: number
+    fovDegrees: number
+  }): Promise<ObjectImage> => ipcRenderer.invoke('imagery:object', request),
   enableNotifications: (enabled: boolean): Promise<Settings> =>
     ipcRenderer.invoke('notifications:enable', enabled),
   scheduledNotifications: (): Promise<AstroEvent[]> =>

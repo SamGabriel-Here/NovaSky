@@ -134,6 +134,26 @@ constant, which runs `CREATE TABLE IF NOT EXISTS` on every start. Mirror any new
 in both `SqliteStore` and `JsonStore` — the JSON store is the fallback when the native
 binding will not load, and the `Store` interface will not compile until both implement it.
 
+## Adding imagery
+
+Imagery is kept apart from measurements throughout: `src/main/imagery.ts` is the only
+module that produces it, and it never feeds a calculation.
+
+- **Bundled** imagery is downloaded by `scripts/build-data.mjs`, listed in
+  `electron-builder.yml` under `extraResources`, and read by `readSkyImage`. Send it to
+  the renderer as raw bytes over IPC and turn it into a blob URL there — that keeps
+  `img-src` in the CSP limited to `blob:` instead of opening it to the filesystem.
+- **Fetched** imagery goes through `getObjectImage`, which must respect
+  `settings.allowNetwork`, cache through the store, and return an `origin` of `live` or
+  `cached` plus a `warning` when it cannot deliver. An absent image is a normal outcome:
+  the sky map keeps its computed rendering.
+
+If you add a new cutout service, match the projection assumptions in
+`buildCutoutGeometry` (gnomonic, north up, east left) or extend it, and add an assertion
+to `tests/renderer/geometry.test.ts`. Orientation bugs are easy to miss by eye on a
+roughly symmetric object; the reliable check is whether the catalogue stars land on the
+stars in the photograph.
+
 ## A note on the CSP
 
 `src/shared/csp.ts` builds the renderer's Content Security Policy. A policy that is too

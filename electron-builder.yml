@@ -10,7 +10,7 @@ extraResources:
   # Offline star / constellation / deep-sky / place catalogues.
   - from: resources/data
     to: data
-    filter: ['**/*.json']
+    filter: ['**/*.json', '**/*.jpg']
 mac:
   category: public.app-category.education
   target: [dmg, zip]

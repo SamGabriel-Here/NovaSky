@@ -17,6 +17,16 @@ export const bridge = {
     warning: null
   })),
   networkStatus: vi.fn(async () => ({ online: true, lastCheckedAt: new Date().toISOString() })),
+  getSkyImage: vi.fn(async () => null),
+  getObjectImage: vi.fn(async () => ({
+    objectId: 'test',
+    fovDegrees: 1,
+    data: null,
+    origin: 'cached' as const,
+    fetchedAt: null,
+    source: null,
+    warning: null
+  })),
   enableNotifications: vi.fn(async () => DEFAULT_SETTINGS),
   scheduledNotifications: vi.fn(async () => []),
   clearData: vi.fn(async () => DEFAULT_SETTINGS),

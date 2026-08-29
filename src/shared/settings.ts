@@ -25,6 +25,8 @@ export const DEFAULT_SETTINGS: Settings = {
   showDeepSky: true,
   showBlackHoles: true,
   showMilkyWay: true,
+  showSkyImagery: true,
+  showObjectImagery: true,
   showSatellites: false,
   starMagnitudeLimit: 5.5,
   notificationsEnabled: false,

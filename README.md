@@ -4,7 +4,7 @@ A desktop stargazing app for Windows, macOS and Linux. NovaSky draws the real sk
 your location at any moment in time, tells you what you are looking at, and works
 without a network connection.
 
-![The sky map over New York on a January evening](docs/screenshots/02-sky.png)
+![The Milky Way over New York, with the photographic sky layer](docs/screenshots/14-photo-sky.png)
 
 ## What it does
 
@@ -12,6 +12,11 @@ without a network connection.
   density *is* the Milky Way, all 88 constellation figures, the Sun, Moon and planets,
   1 314 deep-sky objects drawn at their real angular size and shape, 17 black holes, and
   live satellites. Mouse, trackpad and keyboard navigation, with a horizon and compass.
+- **Real photography, correctly registered** — a photographic all-sky panorama sits
+  behind the computed sky, aligned by converting each view direction into galactic
+  coordinates. Zoom in on a nebula or galaxy and NovaSky loads an actual survey image of
+  it, placed at its true position, scale and orientation, with the catalogue stars
+  landing on the stars in the photograph.
 - **Object search and details** — find anything by name, Bayer letter or catalogue
   number and get its altitude, azimuth, magnitude, distance, rise/transit/set times,
   visibility, best viewing time, a plain-language explanation, and links to NASA,

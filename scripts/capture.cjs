@@ -53,7 +53,8 @@ app.whenReady().then(async () => {
       await store.getState().updateSettings({
         location: { latitude: 40.7128, longitude: -74.006, elevation: 10,
                     label: 'New York, United States', timeZone: 'America/New_York', source: 'manual' },
-        onboardingComplete: true
+        onboardingComplete: true,
+        beginnerMode: false
       })
       store.setState({ onboardingOpen: false })
       store.getState().setTime(new Date('2027-01-15T01:30:00Z'))
@@ -165,6 +166,52 @@ app.whenReady().then(async () => {
   `)
   await wait(3500)
   await shoot(win, '13-nebula')
+
+  // --- imagery -----------------------------------------------------------
+  // The all-sky panorama over the galactic centre, at a wide field where the
+  // photograph is at its best. The bulge must land on Sagittarius.
+  await run(`
+    (() => {
+      const s = window.__novaskyStore.getState();
+      s.setScreen('sky');
+      s.setSelectedNull = null;
+      s.select(null);
+      s.setTime(new Date('2027-07-15T03:30:00Z'));
+    })()
+  `)
+  await wait(1500)
+  for (let i = 0; i < 12; i++) {
+    win.webContents.sendInputEvent({ type: 'keyDown', keyCode: '-' })
+    win.webContents.sendInputEvent({ type: 'keyUp', keyCode: '-' })
+    await wait(80)
+  }
+  // Look south, where the galactic centre sits on this date.
+  for (let i = 0; i < 6; i++) {
+    win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Down' })
+    win.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Down' })
+    await wait(60)
+  }
+  await wait(3500)
+  await shoot(win, '14-photo-sky')
+
+  // A survey cutout of the Orion Nebula, registered against the catalogue stars.
+  await run(`
+    (() => {
+      const s = window.__novaskyStore.getState();
+      s.setTime(new Date('2027-01-15T02:00:00Z'));
+      s.select('dso:NGC1976', { focus: true });
+    })()
+  `)
+  await wait(3000)
+  for (let i = 0; i < 5; i++) {
+    win.webContents.sendInputEvent({ type: 'keyDown', keyCode: '+' })
+    win.webContents.sendInputEvent({ type: 'keyUp', keyCode: '+' })
+    await wait(150)
+  }
+  await run(`window.__novaskyStore.getState().select('dso:NGC1976', { focus: true })`)
+  // The cutout is debounced, then downloaded, then decoded.
+  await wait(9000)
+  await shoot(win, '15-object-photo')
 
   const errors = await run(`window.__novaskyErrors || []`)
   if (errors.length > 0) {

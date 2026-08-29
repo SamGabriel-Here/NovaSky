@@ -18,6 +18,8 @@ interface LayerToggle {
     | 'showDeepSky'
     | 'showBlackHoles'
     | 'showMilkyWay'
+    | 'showSkyImagery'
+    | 'showObjectImagery'
     | 'showSatellites'
   label: string
   hint: string
@@ -30,6 +32,8 @@ const LAYERS: LayerToggle[] = [
   { key: 'showDeepSky', label: 'Deep sky', hint: 'Nebulae, clusters and galaxies, drawn at their real catalogued size and shape' },
   { key: 'showBlackHoles', label: 'Black holes', hint: 'Seventeen confirmed black holes and black-hole candidates, from Cygnus X-1 to the one at the centre of the galaxy' },
   { key: 'showMilkyWay', label: 'Milky Way', hint: 'Adds 74 000 telescopic stars from the HYG catalogue; their density along the galactic plane is the Milky Way itself' },
+  { key: 'showSkyImagery', label: 'Photo sky', hint: 'A photographic all-sky panorama behind the computed sky, showing the real dust lanes and nebulosity of the Milky Way. Bundled with the app, so it works offline' },
+  { key: 'showObjectImagery', label: 'Deep-sky photos', hint: 'Zoom in on a selected nebula, cluster or galaxy to load a real survey image of it, placed at its true position and orientation. Needs the network the first time' },
   { key: 'showHorizon', label: 'Horizon', hint: 'Draw the ground, the horizon line and the compass points' },
   { key: 'showGrid', label: 'Grid', hint: 'Overlay an altitude and azimuth grid' },
   { key: 'showSatellites', label: 'Satellites', hint: 'Plot satellites from downloaded orbital elements. Needs a network connection to stay accurate.' }
