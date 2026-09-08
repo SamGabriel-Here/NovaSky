@@ -214,6 +214,29 @@ app.whenReady().then(async () => {
   await wait(9000)
   await shoot(win, '15-object-photo')
 
+  // --- Solar System surfaces -------------------------------------------
+  // Each of these needs deep magnification before the body has a disc at all.
+  async function shootBody(name, objectId, iso, zooms) {
+    await run(`window.__novaskyStore.getState().setTime(new Date('${iso}'))`)
+    await wait(600)
+    await run(`window.__novaskyStore.getState().select('${objectId}', { focus: true })`)
+    await wait(2200)
+    for (let i = 0; i < zooms; i++) {
+      win.webContents.sendInputEvent({ type: 'keyDown', keyCode: '+' })
+      win.webContents.sendInputEvent({ type: 'keyUp', keyCode: '+' })
+      await wait(70)
+    }
+    await run(`window.__novaskyStore.getState().select('${objectId}', { focus: true })`)
+    await wait(2200)
+    await run(`window.__novaskyStore.getState().select(null)`)
+    await wait(900)
+    await shoot(win, name)
+  }
+
+  await shootBody('16-moon-surface', 'moon', '2027-07-19T04:00:00Z', 13)
+  await shootBody('17-jupiter', 'jupiter', '2027-01-15T02:00:00Z', 24)
+  await shootBody('18-saturn', 'saturn', '2027-01-15T02:00:00Z', 29)
+
   const errors = await run(`window.__novaskyErrors || []`)
   if (errors.length > 0) {
     console.error('RENDERER ERRORS:', JSON.stringify(errors, null, 2))
@@ -227,4 +250,4 @@ app.whenReady().then(async () => {
 setTimeout(() => {
   console.error('capture timed out')
   app.exit(3)
-}, 90000)
+}, 300000)

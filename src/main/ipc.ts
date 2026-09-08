@@ -19,7 +19,12 @@ import type {
 } from '../shared/types'
 import { loadCatalog } from './catalog'
 import { getNetworkStatus, getTleBundle } from './network'
-import { getObjectImage, readSkyImage, type ObjectImageRequest } from './imagery'
+import {
+  getObjectImage,
+  readBodyTexture,
+  readSkyImage,
+  type ObjectImageRequest
+} from './imagery'
 import type { NotificationScheduler } from './notifications'
 import type { Store } from './store'
 
@@ -87,6 +92,12 @@ export function registerIpc(context: IpcContext): void {
   ipcMain.handle('imagery:sky', (): Uint8Array | null => {
     const image = readSkyImage()
     return image ? new Uint8Array(image) : null
+  })
+
+  // Surface maps for the Solar System, sent on demand as raw bytes.
+  ipcMain.handle('imagery:texture', (_event, id: string): Uint8Array | null => {
+    const bytes = readBodyTexture(id)
+    return bytes ? new Uint8Array(bytes) : null
   })
 
   ipcMain.handle(

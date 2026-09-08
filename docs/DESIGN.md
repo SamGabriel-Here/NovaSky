@@ -163,6 +163,14 @@ speckle rather than glow.
 
 ![The galactic centre](screenshots/11-milky-way.png)
 
+Planets are dots until you magnify them, then they become lit spheres with their real
+surface maps. Nothing about that is a special case: the sphere is rebuilt per fragment,
+the map is sampled against the body's own IAU axes, and one dot product against the
+direction to the Sun produces the phase. Saturn's rings are a genuine annulus in its
+equatorial plane, so they thin out and disappear as the tilt closes.
+
+![Saturn and its rings at high magnification](screenshots/18-saturn.png)
+
 The Moon is drawn with its true phase. The terminator is the projected ellipse it
 actually is, the bright limb points at the computed position of the Sun, and the unlit
 portion carries a hint of earthshine.

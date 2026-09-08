@@ -142,6 +142,27 @@ export function SkyCanvas(): JSX.Element {
     if (object) rendererRef.current?.focusOnObject(object)
   }, [focusRequest, catalog])
 
+  // Surface maps for the Solar System, fetched once each. A body without one keeps its
+  // plain marker, so a missing texture degrades quietly.
+  useEffect(() => {
+    let cancelled = false
+    const bodies = [
+      'sun', 'moon', 'mercury', 'venus', 'mars',
+      'jupiter', 'saturn', 'saturn-ring', 'uranus', 'neptune'
+    ]
+    for (const id of bodies) {
+      void window.novasky
+        .getBodyTexture(id)
+        .then((bytes) => {
+          if (!cancelled && bytes) rendererRef.current?.setBodyTexture(id, bytes)
+        })
+        .catch(() => undefined)
+    }
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   // The bundled all-sky photograph: fetched once, over IPC, as raw bytes.
   useEffect(() => {
     let cancelled = false

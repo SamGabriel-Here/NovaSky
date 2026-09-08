@@ -42,7 +42,10 @@ const SOURCES = {
   simbadTap: 'https://simbad.cds.unistra.fr/simbad/sim-tap/sync',
   // ESO GigaGalaxy Zoom all-sky panorama by Serge Brunier: a photographic mosaic of the
   // whole sky, equirectangular in galactic coordinates. CC BY 4.0.
-  milkyWay: 'https://cdn.eso.org/images/publicationjpg/eso0932a.jpg'
+  milkyWay: 'https://cdn.eso.org/images/publicationjpg/eso0932a.jpg',
+  // Surface maps for the Solar System, assembled from spacecraft imagery by Solar
+  // System Scope and published under CC BY 4.0.
+  textureBase: 'https://www.solarsystemscope.com/textures/download'
 }
 
 /** Magnitude cut for the shipped star catalogue. 6.5 ~ naked-eye limit in dark skies. */
@@ -329,6 +332,50 @@ async function buildSkyImage() {
   return bytes.length
 }
 
+// ------------------------------------------------------------ textures
+
+/**
+ * Surface maps for the Solar System.
+ *
+ * These are equirectangular photographic maps built from spacecraft imagery: the Moon
+ * from Lunar Reconnaissance Orbiter, Mars from Viking, the giant planets from Voyager
+ * and Cassini. They let the renderer draw a planet as a lit sphere with real surface
+ * detail instead of a coloured dot, once you zoom in far enough for it to have a disc.
+ *
+ * The Saturn file is a radial strip with transparency, sampled outward from the planet.
+ */
+const TEXTURES = [
+  { id: 'sun', file: '2k_sun.jpg' },
+  { id: 'mercury', file: '2k_mercury.jpg' },
+  { id: 'venus', file: '2k_venus_atmosphere.jpg' },
+  { id: 'moon', file: '2k_moon.jpg' },
+  { id: 'mars', file: '2k_mars.jpg' },
+  { id: 'jupiter', file: '2k_jupiter.jpg' },
+  { id: 'saturn', file: '2k_saturn.jpg' },
+  { id: 'uranus', file: '2k_uranus.jpg' },
+  { id: 'neptune', file: '2k_neptune.jpg' },
+  { id: 'saturn-ring', file: '2k_saturn_ring_alpha.png' }
+]
+
+async function buildTextures() {
+  const dir = path.join(OUT, 'textures')
+  await mkdir(dir, { recursive: true })
+  let total = 0
+  for (const texture of TEXTURES) {
+    const cached = await download(`${SOURCES.textureBase}/${texture.file}`, texture.file)
+    const bytes = await readFile(cached)
+    // A missing texture on this service comes back as an HTML error page.
+    if (bytes.length < 20000 && !texture.file.includes('ring')) {
+      throw new Error(`${texture.file} looks like an error page, not an image`)
+    }
+    const ext = texture.file.endsWith('.png') ? 'png' : 'jpg'
+    await writeFile(path.join(dir, `${texture.id}.${ext}`), bytes)
+    total += bytes.length
+  }
+  console.log(`  texture ${TEXTURES.length} surface maps (${(total / 1e6).toFixed(1)} MB)`)
+  return total
+}
+
 // --------------------------------------------------------- black holes
 
 /**
@@ -478,6 +525,7 @@ async function main() {
   const dso = await buildDeepSky()
   const blackHoles = await buildBlackHoles()
   const skyImageBytes = await buildSkyImage()
+  const textureBytes = await buildTextures()
   const places = await buildPlaces()
   const manifest = {
     generatedAt: new Date().toISOString(),
@@ -491,6 +539,7 @@ async function main() {
       deepSky: dso.length,
       blackHoles: blackHoles.length,
       skyImageBytes,
+      textureBytes,
       places: places.length
     },
     sources: SOURCES

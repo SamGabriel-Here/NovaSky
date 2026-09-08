@@ -28,6 +28,8 @@ const api = {
     ipcRenderer.invoke('satellites:tle', options),
   networkStatus: (): Promise<NetworkStatus> => ipcRenderer.invoke('network:status'),
   getSkyImage: (): Promise<Uint8Array | null> => ipcRenderer.invoke('imagery:sky'),
+  getBodyTexture: (id: string): Promise<Uint8Array | null> =>
+    ipcRenderer.invoke('imagery:texture', id),
   getObjectImage: (request: {
     objectId: string
     raDegrees: number

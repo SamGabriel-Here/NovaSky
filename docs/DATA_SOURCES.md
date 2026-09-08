@@ -126,6 +126,33 @@ resolution and survey cutouts take over.
 
 Credit: ESO/S. Brunier. Licence: CC BY 4.0.
 
+### Surface maps: Solar System Scope
+
+<https://www.solarsystemscope.com/textures/>
+
+Equirectangular maps of the Sun, the Moon and every planet, assembled from spacecraft
+imagery: the Moon from Lunar Reconnaissance Orbiter, Mars from Viking, the giant planets
+from Voyager and Cassini. Saturn's rings come as a radial strip with transparency.
+
+These let the renderer draw a planet as a lit sphere once its disc is more than about
+ten pixels across. Below that the plain marker is clearer and the maps are not loaded
+into the scene at all.
+
+Nothing about the drawing is stylised. The sphere is reconstructed per fragment from the
+quad coordinate, the surface map is sampled against the body's real IAU body-fixed axes,
+and the lighting is a single dot product against the direction from the body to the Sun.
+That produces the phase for free: Venus shows a crescent, the Moon shows its terminator,
+and neither is special-cased. Saturn's rings are a real annulus in the planet's
+equatorial plane, so the ellipse you see is genuine foreshortening and the rings vanish
+when they are edge on because they actually are.
+
+The strongest check on the orientation is that the Moon is tidally locked. The sub-Earth
+point has to stay within a libration of the origin of its coordinate system, and
+`tests/astro/bodies.test.ts` asserts exactly that across several dates, along with the
+few degrees of libration that should still be there.
+
+Credit: Solar System Scope. Licence: CC BY 4.0.
+
 ### Deep-sky cutouts: Digitized Sky Survey
 
 Fetched on demand from CDS's `hips2fits` service (DSS2 colour), with NASA SkyView as a

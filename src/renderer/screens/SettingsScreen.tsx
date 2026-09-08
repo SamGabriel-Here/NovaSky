@@ -299,9 +299,9 @@ export function SettingsScreen(): JSX.Element {
           </div>
 
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
-            Imagery credits: all-sky panorama © ESO/S. Brunier, CC BY 4.0. Deep-sky
-            photographs from the Digitized Sky Survey, served by CDS/Aladin and NASA
-            SkyView.
+            Imagery credits: all-sky panorama © ESO/S. Brunier, CC BY 4.0. Planetary
+            surface maps © Solar System Scope, CC BY 4.0. Deep-sky photographs from the
+            Digitized Sky Survey, served by CDS/Aladin and NASA SkyView.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-slate-500">
             NovaSky has no account system and no telemetry. Your location, settings and learning
@@ -338,7 +338,7 @@ export function SettingsScreen(): JSX.Element {
             <button type="button" onClick={reopenOnboarding} className="text-nova-300 hover:text-nova-200">
               Replay the introduction
             </button>
-            <Tooltip label="Star positions: HYG v4.1 (Hipparcos/Yale/Gliese). Deep sky: OpenNGC. Constellation figures: d3-celestial. Black holes: SIMBAD. Ephemeris: astronomy-engine. Satellites: CelesTrak. All-sky photograph: ESO/S. Brunier (CC BY 4.0). Deep-sky photographs: Digitized Sky Survey via CDS/Aladin and NASA SkyView.">
+            <Tooltip label="Star positions: HYG v4.1 (Hipparcos/Yale/Gliese). Deep sky: OpenNGC. Constellation figures: d3-celestial. Black holes: SIMBAD. Ephemeris: astronomy-engine. Satellites: CelesTrak. All-sky photograph: ESO/S. Brunier (CC BY 4.0). Planetary surface maps: Solar System Scope (CC BY 4.0). Deep-sky photographs: Digitized Sky Survey via CDS/Aladin and NASA SkyView.">
               <span className="inline-flex items-center gap-1 text-slate-400">
                 <Icon name="info" size={13} />
                 Data sources

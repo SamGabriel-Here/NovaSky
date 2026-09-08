@@ -22,6 +22,11 @@ app fetches a real survey image of it and puts it in place at the right size and
 The catalogue stars land on the stars in the photograph, which is how you can tell it
 went in the right place.
 
+Keep zooming and the planets stop being dots. Each one becomes a lit sphere carrying its
+real surface map, at its true apparent size, showing the phase it is actually in. The
+Moon shows the near side with its libration, Jupiter shows its cloud bands, and Saturn's
+rings are a real annulus in the planet's equatorial plane rather than a drawn ellipse.
+
 Search finds anything by name, Bayer letter or catalogue number. Select it and you get
 altitude, azimuth, magnitude, distance, rise and set times, when it is best placed
 tonight, a short explanation of what it actually is, and links out to NASA, Wikipedia

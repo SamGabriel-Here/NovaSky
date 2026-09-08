@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-29T00:25:08.036Z",
+  "generatedAt": "2026-09-07T14:05:47.043Z",
   "starMagnitudeLimit": 6.5,
   "faintStarMagnitudeLimit": 9,
   "dsoMagnitudeLimit": 11.5,
@@ -10,6 +10,7 @@
     "deepSky": 1314,
     "blackHoles": 17,
     "skyImageBytes": 4857484,
+    "textureBytes": 4759436,
     "places": 418
   },
   "sources": {
@@ -20,6 +21,7 @@
     "ngcAddendum": "https://raw.githubusercontent.com/mattiaverga/OpenNGC/master/database_files/addendum.csv",
     "tzMeta": "https://raw.githubusercontent.com/moment/moment-timezone/develop/data/meta/latest.json",
     "simbadTap": "https://simbad.cds.unistra.fr/simbad/sim-tap/sync",
-    "milkyWay": "https://cdn.eso.org/images/publicationjpg/eso0932a.jpg"
+    "milkyWay": "https://cdn.eso.org/images/publicationjpg/eso0932a.jpg",
+    "textureBase": "https://www.solarsystemscope.com/textures/download"
   }
 }

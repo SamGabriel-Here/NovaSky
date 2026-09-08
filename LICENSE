@@ -34,6 +34,8 @@ listed in full, with their sources, in docs/DATA_SOURCES.md. In summary:
   moment-timezone (time-zone reference points)  MIT
   ESO/S. Brunier, GigaGalaxy Zoom all-sky
     panorama (resources/data/milkyway.jpg)      CC BY 4.0
+  Solar System Scope, planetary surface maps
+    (resources/data/textures/)                  CC BY 4.0
 
 Data fetched at runtime is not redistributed with this software:
 

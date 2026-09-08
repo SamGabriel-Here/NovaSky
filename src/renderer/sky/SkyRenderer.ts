@@ -25,6 +25,13 @@ import {
 import type { Catalog } from '@shared/astro/catalog'
 import { blackHoleToSkyObject, deepSkyToSkyObject, SOLAR_SYSTEM } from '@shared/astro/catalog'
 import { getIllumination, getPosition } from '@shared/astro/ephemeris'
+import {
+  EQUATORIAL_RADIUS_KM,
+  SATURN_RING_KM,
+  bodyFrame,
+  getBodyAppearance,
+  inFrame
+} from '@shared/astro/bodies'
 import type { SatelliteState } from '@shared/astro/satellites'
 import { BEGINNER_CONSTELLATIONS } from '@shared/astro/lore'
 
@@ -53,7 +60,12 @@ export interface CameraState {
 }
 
 const DEFAULT_CAMERA: CameraState = { altitude: 35, azimuth: 180, fov: 65 }
-const MIN_FOV = 4
+/**
+ * Minimum field of view, in degrees. Jupiter is about 45 arcseconds across at its best,
+ * so anything wider than roughly a tenth of a degree leaves it a handful of pixels. This
+ * is deliberately telescope-range so the surface maps are worth having.
+ */
+const MIN_FOV = 0.02
 const MAX_FOV = 110
 /** Radius of the celestial sphere in world units. Everything sits on it. */
 const SKY_RADIUS = 100
@@ -507,6 +519,113 @@ const MOON_FRAGMENT = /* glsl */ `
   }
 `
 
+/**
+ * A Solar System body drawn as a lit sphere.
+ *
+ * The geometry is a flat quad tangent to the celestial sphere, sized to the body's real
+ * angular diameter and oriented so that its +y axis is the body's north pole projected
+ * into the plane of the sky. The sphere itself is reconstructed per fragment: the quad
+ * coordinate gives x and y on the unit disc, and z follows, which is both the surface
+ * normal and the direction used to look up the equirectangular surface map.
+ *
+ * Lighting is a single dot product against the direction from the body to the Sun,
+ * expressed in the same frame. That reproduces the phase exactly, so Venus shows a
+ * crescent and the Moon shows its terminator without any of it being special-cased.
+ */
+const BODY_VERTEX = /* glsl */ `
+  varying vec2 vDisc;
+  void main() {
+    // uv runs 0 to 1 across the quad; the disc runs -1 to 1.
+    vDisc = uv * 2.0 - 1.0;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const BODY_FRAGMENT = /* glsl */ `
+  uniform sampler2D surface;
+  uniform vec3 sunDirection;   // body -> Sun, in the quad's frame
+  uniform vec3 bodyPole;       // body-fixed axes, in the quad's frame
+  uniform vec3 bodyPrime;
+  uniform vec3 bodyEast;
+  uniform float ambient;       // light on the unlit side
+  uniform float emissive;      // 1 for the Sun, which is not lit from outside
+  varying vec2 vDisc;
+
+  const float PI = 3.14159265358979;
+
+  void main() {
+    float r2 = dot(vDisc, vDisc);
+    if (r2 > 1.0) discard;
+
+    // Rebuild the sphere. +z points back toward the observer, so this is the normal of
+    // the hemisphere we can see.
+    vec3 normal = vec3(vDisc, sqrt(max(0.0, 1.0 - r2)));
+
+    // Equirectangular lookup against the body's own axes. Working from the real
+    // body-fixed frame rather than a spin offset is what puts the near side of the Moon
+    // toward us, libration included.
+    float latitude = asin(clamp(dot(normal, bodyPole), -1.0, 1.0));
+    float longitude = atan(dot(normal, bodyEast), dot(normal, bodyPrime));
+    vec2 uv = vec2(fract(0.5 + longitude / (2.0 * PI)), 0.5 - latitude / PI);
+    vec3 colour = texture2D(surface, uv).rgb;
+
+    // Phase. A little wrap softens the terminator, which is otherwise unnaturally hard
+    // for a body with an atmosphere.
+    float lambert = dot(normal, sunDirection);
+    float lit = clamp((lambert + 0.08) / 1.08, 0.0, 1.0);
+    lit = mix(ambient, 1.0, lit);
+    colour *= mix(lit, 1.0, emissive);
+
+    // Feather the limb by a fraction of a pixel so the disc is not visibly polygonal.
+    float edge = smoothstep(1.0, 0.985, sqrt(r2));
+    gl_FragColor = vec4(colour, edge);
+  }
+`
+
+/**
+ * Saturn's rings.
+ *
+ * The geometry is a real annulus in the ring plane, so the ellipse you see is genuine
+ * foreshortening rather than a drawn ellipse: when the rings are edge on they vanish,
+ * because they actually are edge on. Each vertex also carries its position in the
+ * planet's own frame, which is what lets the fragment stage hide the half of the ring
+ * that passes behind the globe.
+ */
+const RING_VERTEX = /* glsl */ `
+  attribute vec3 ringLocal;   // position in planet radii: xy across the sky, z toward us
+  attribute float radial;     // 0 at the inner edge, 1 at the outer edge
+  varying vec3 vRingLocal;
+  varying float vRadial;
+  void main() {
+    vRingLocal = ringLocal;
+    vRadial = radial;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const RING_FRAGMENT = /* glsl */ `
+  uniform sampler2D ringMap;
+  uniform vec3 sunDirection;
+  varying vec3 vRingLocal;
+  varying float vRadial;
+
+  void main() {
+    // Hide the part of the ring that is behind the globe.
+    if (length(vRingLocal.xy) < 1.0 && vRingLocal.z < 0.0) discard;
+
+    // Note: do not name this "sample". That is a reserved word in GLSL, and three.js
+    // reports the resulting compile failure quietly enough to look like a geometry bug.
+    vec4 texel = texture2D(ringMap, vec2(vRadial, 0.5));
+    if (texel.a < 0.02) discard;
+
+    // The rings are lit from whichever face the Sun is on, and they are translucent, so
+    // the unlit face still shows. Keep a floor rather than letting it go black.
+    float facing = abs(sunDirection.z);
+    float light = mix(0.45, 1.0, clamp(facing, 0.0, 1.0));
+    gl_FragColor = vec4(texel.rgb * light, texel.a);
+  }
+`
+
 const PLANET_VERTEX = /* glsl */ `
   attribute float markerSize;
   attribute vec3 tint;
@@ -552,6 +671,12 @@ export class SkyRenderer {
   private blackHoles: THREE.Points | null = null
   private moon: THREE.Points | null = null
   private skyImage: THREE.Mesh | null = null
+  /** One lit-sphere mesh per Solar System body that has a surface map. */
+  private bodyMeshes = new Map<string, THREE.Mesh>()
+  private bodyTextures = new Map<string, THREE.Texture>()
+  private ringMesh: THREE.Mesh | null = null
+  /** Field of view the body meshes were last sized for. */
+  private bodyMeshFov = 0
   private objectImage: THREE.Mesh | null = null
   private objectImageId: string | null = null
   private blackHoleObjects: SkyObject[] = []
@@ -843,7 +968,7 @@ export class SkyRenderer {
     }
     if (bytes.byteLength === 0) return
 
-    const texture = loadJpegTexture(bytes)
+    const texture = loadImageTexture(bytes)
     texture.colorSpace = THREE.SRGBColorSpace
     // No mipmaps: the sampler wraps in longitude, and mipmapped wrapping produces a
     // visible seam down the anti-centre of the galaxy.
@@ -874,6 +999,181 @@ export class SkyRenderer {
   }
 
   /**
+   * Registers the surface map for one body. Once a texture arrives the body is drawn as
+   * a lit sphere instead of a plain marker.
+   */
+  setBodyTexture(objectId: string, bytes: Uint8Array | null): void {
+    const existing = this.bodyTextures.get(objectId)
+    if (existing) existing.dispose()
+    if (!bytes || bytes.byteLength === 0) {
+      this.bodyTextures.delete(objectId)
+      return
+    }
+    const texture = loadImageTexture(bytes)
+    texture.colorSpace = THREE.SRGBColorSpace
+    // The map wraps in longitude and must not bleed across the poles.
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapT = THREE.ClampToEdgeWrapping
+    // No mipmaps. The longitude lookup wraps through fract(), so at the meridian where
+    // it wraps the texture derivative jumps and the hardware picks the coarsest mip,
+    // drawing a dark seam straight down the planet. The disc is always magnified at the
+    // zoom levels where it is drawn at all, so mipmaps buy nothing here anyway.
+    texture.generateMipmaps = false
+    texture.minFilter = THREE.LinearFilter
+    texture.magFilter = THREE.LinearFilter
+    this.bodyTextures.set(objectId, texture)
+    this.updateBodyMeshes()
+  }
+
+  /**
+   * Rebuilds the lit spheres for the current moment.
+   *
+   * A body only earns a sphere once its disc is worth more than a few pixels; below
+   * that the plain marker reads better and costs less.
+   */
+  private updateBodyMeshes(): void {
+    if (!this.catalog) return
+    const pixelsPerDegree =
+      (this.canvas.clientHeight || 900) / Math.max(this.cameraState.fov, 0.001)
+
+    for (const entry of SOLAR_SYSTEM) {
+      const texture = this.bodyTextures.get(entry.id)
+      const object = this.catalog.objects.get(entry.id)
+      const existing = this.bodyMeshes.get(entry.id)
+
+      let appearance = null
+      if (texture && object?.body) {
+        try {
+          appearance = getBodyAppearance(entry.id, object.body, this.time)
+        } catch {
+          appearance = null
+        }
+      }
+
+      // Below about ten pixels across there is no detail to see.
+      const wide = appearance !== null && appearance.angularDiameter * pixelsPerDegree > 10
+      if (!appearance || !wide) {
+        if (existing) {
+          this.skyGroup.remove(existing)
+          existing.geometry.dispose()
+          ;(existing.material as THREE.Material).dispose()
+          this.bodyMeshes.delete(entry.id)
+        }
+        continue
+      }
+
+      const frame = bodyFrame(appearance)
+      const sun = inFrame(frame, appearance.toSun)
+      const pole = inFrame(frame, appearance.northPole)
+      const prime = inFrame(frame, appearance.primeMeridian)
+      const east = inFrame(frame, appearance.eastward)
+      // The drawn position comes from the ephemeris, refraction included, so the disc
+      // sits exactly where the marker and the label already are.
+      const position = getPosition(object!, this.time, this.location)
+      const centre = this.horizontalToEqjLocal(position.altitude, position.azimuth)
+
+      const geometry = buildDiscGeometry(centre, frame, appearance.angularDiameter / 2)
+
+      if (existing) {
+        existing.geometry.dispose()
+        existing.geometry = geometry
+        const { uniforms } = existing.material as THREE.ShaderMaterial
+        uniforms.sunDirection.value.set(sun.x, sun.y, sun.z)
+        uniforms.bodyPole.value.set(pole.x, pole.y, pole.z)
+        uniforms.bodyPrime.value.set(prime.x, prime.y, prime.z)
+        uniforms.bodyEast.value.set(east.x, east.y, east.z)
+        continue
+      }
+
+      const material = new THREE.ShaderMaterial({
+        vertexShader: BODY_VERTEX,
+        fragmentShader: BODY_FRAGMENT,
+        transparent: true,
+        depthWrite: false,
+        // The quad is tangent to a sphere viewed from the inside, so whether it winds
+        // toward the camera depends on the handedness of the body's own frame. Draw
+        // both faces rather than depend on it.
+        side: THREE.DoubleSide,
+        uniforms: {
+          surface: { value: texture },
+          sunDirection: { value: new THREE.Vector3(sun.x, sun.y, sun.z) },
+          bodyPole: { value: new THREE.Vector3(pole.x, pole.y, pole.z) },
+          bodyPrime: { value: new THREE.Vector3(prime.x, prime.y, prime.z) },
+          bodyEast: { value: new THREE.Vector3(east.x, east.y, east.z) },
+          // A touch of light on the night side: earthshine on the Moon, and enough on a
+          // planet to keep the unlit limb from vanishing into the sky.
+          ambient: { value: entry.id === 'moon' ? 0.06 : 0.03 },
+          emissive: { value: entry.id === 'sun' ? 1 : 0 }
+        }
+      })
+      const mesh = new THREE.Mesh(geometry, material)
+      mesh.frustumCulled = false
+      mesh.renderOrder = 2
+      this.skyGroup.add(mesh)
+      this.bodyMeshes.set(entry.id, mesh)
+    }
+
+    this.updateRings()
+  }
+
+  /** Saturn's rings, drawn whenever its globe is. */
+  private updateRings(): void {
+    const texture = this.bodyTextures.get('saturn-ring')
+    const globe = this.bodyMeshes.get('saturn')
+    const object = this.catalog?.objects.get('saturn')
+
+    if (this.ringMesh) {
+      this.skyGroup.remove(this.ringMesh)
+      this.ringMesh.geometry.dispose()
+      ;(this.ringMesh.material as THREE.Material).dispose()
+      this.ringMesh = null
+    }
+    if (!texture || !globe || !object?.body) return
+
+    const appearance = getBodyAppearance('saturn', object.body, this.time)
+    if (!appearance) return
+    const frame = bodyFrame(appearance)
+    const sun = inFrame(frame, appearance.toSun)
+
+    // Distance in kilometres, from the angular diameter that was already computed.
+    const radiusKm = EQUATORIAL_RADIUS_KM.saturn
+    const distanceKm = radiusKm / Math.tan((appearance.angularDiameter / 2) * DEG)
+
+    // The globe is drawn at the apparent position, refraction included, so the ring has
+    // to be built around that same centre. Using the geometric direction instead puts
+    // the ring a couple of arcminutes away, which at this magnification is several
+    // planet diameters off screen.
+    const apparent = getPosition(object, this.time, this.location)
+    const centreDirection = this.horizontalToEqjLocal(apparent.altitude, apparent.azimuth)
+
+    const geometry = buildRingGeometry(
+      centreDirection,
+      frame,
+      appearance,
+      distanceKm,
+      radiusKm,
+      SATURN_RING_KM.inner,
+      SATURN_RING_KM.outer
+    )
+    const material = new THREE.ShaderMaterial({
+      vertexShader: RING_VERTEX,
+      fragmentShader: RING_FRAGMENT,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      uniforms: {
+        ringMap: { value: texture },
+        sunDirection: { value: new THREE.Vector3(sun.x, sun.y, sun.z) }
+      }
+    })
+    this.ringMesh = new THREE.Mesh(geometry, material)
+    this.ringMesh.frustumCulled = false
+    // Just after the globe, so the near half of the ring crosses in front of it.
+    this.ringMesh.renderOrder = 2.5
+    this.skyGroup.add(this.ringMesh)
+  }
+
+  /**
    * Places a survey cutout on the sky.
    *
    * The mesh is built from the image's own projection: a gnomonic (TAN) cutout with
@@ -897,7 +1197,7 @@ export class SkyRenderer {
     this.objectImageId = objectId
     if (!objectId || !bytes || bytes.byteLength === 0) return
 
-    const texture = loadJpegTexture(bytes)
+    const texture = loadImageTexture(bytes)
     texture.colorSpace = THREE.SRGBColorSpace
 
     const material = new THREE.ShaderMaterial({
@@ -1381,15 +1681,17 @@ export class SkyRenderer {
       positions.setXYZ(i, v.x * SKY_RADIUS, v.y * SKY_RADIUS, v.z * SKY_RADIUS)
       const color = new THREE.Color(colors[object.id] ?? 0xffffff)
       tints.setXYZ(i, color.r, color.g, color.b)
-      // The Sun is drawn as a bright disc; the Moon has its own phase-aware sprite, so
-      // its generic marker is suppressed. The planets are points to the eye but need to
-      // be big enough to click.
-      sizes.setX(i, object.id === 'moon' ? 0 : object.id === 'sun' ? 26 : 14)
+      // A body drawn as a lit sphere hides its flat marker, otherwise the marker sits
+      // on top of the surface detail. The Moon always uses a sphere or its phase
+      // sprite, never a dot.
+      const hasSphere = this.bodyMeshes.has(object.id)
+      sizes.setX(i, hasSphere || object.id === 'moon' ? 0 : object.id === 'sun' ? 26 : 14)
     }
     positions.needsUpdate = true
     tints.needsUpdate = true
     sizes.needsUpdate = true
     this.updateMoon()
+    this.updateBodyMeshes()
     this.refreshLabels()
   }
 
@@ -1804,8 +2106,10 @@ export class SkyRenderer {
       this.camera.updateProjectionMatrix()
     }
 
-    // Zoom factor keeps stars proportionally sized as the field narrows.
-    const zoom = Math.sqrt(DEFAULT_CAMERA.fov / this.cameraState.fov)
+    // Zoom factor keeps stars proportionally sized as the field narrows, but it is
+    // capped: a star is a point source, and past a few times magnification it should
+    // stop growing rather than swell into a disc it does not have.
+    const zoom = Math.min(3.2, Math.sqrt(DEFAULT_CAMERA.fov / this.cameraState.fov))
     const elapsed = ((performance.now() - this.startedAt) / 1000) * this.animate
     // Nebulae are drawn at their true angular size, which means converting degrees of
     // sky into pixels for the current field of view.
@@ -1834,6 +2138,14 @@ export class SkyRenderer {
       if (uniforms.animate) uniforms.animate.value = this.animate
     }
 
+    // The size threshold for drawing a body as a sphere depends on magnification, so
+    // the meshes are rebuilt when the field of view moves materially. Every frame would
+    // be wasteful; this settles within a few frames of a zoom.
+    if (Math.abs(this.cameraState.fov - this.bodyMeshFov) > this.bodyMeshFov * 0.04) {
+      this.bodyMeshFov = this.cameraState.fov
+      this.updateBodyMeshes()
+    }
+
     if (this.skyImage) {
       // The panorama is 4000 pixels across the whole sky, so past roughly a 30-degree
       // field it is being magnified past its resolution and turns to blur. Fade it out
@@ -1856,6 +2168,8 @@ export class SkyRenderer {
       const { uniforms } = this.moon.material as THREE.ShaderMaterial
       uniforms.sizePixels.value = Math.max(16, 0.52 * pxPerDegree)
       this.moonSizeCss = uniforms.sizePixels.value / this.renderer.getPixelRatio()
+      // Once the textured sphere is up, the plain phase sprite would only double it.
+      this.moon.visible = !this.bodyMeshes.has('moon')
     }
 
     // Fade the Milky Way out as the field narrows: at high magnification the faint
@@ -1991,15 +2305,21 @@ function disposeShaderMaterial(material: THREE.ShaderMaterial): void {
 }
 
 /**
- * Turns raw JPEG bytes into a texture via a blob URL, which keeps `img-src` in the
+ * Turns raw image bytes into a texture via a blob URL, which keeps `img-src` in the
  * Content Security Policy limited to `blob:` instead of opening it up to the
  * filesystem. The URL is revoked as soon as the decode completes.
+ *
+ * The type is sniffed from the signature rather than assumed: the surface maps are
+ * JPEG but Saturn's ring needs an alpha channel and so arrives as a PNG.
  */
-function loadJpegTexture(bytes: Uint8Array): THREE.Texture {
+function loadImageTexture(bytes: Uint8Array): THREE.Texture {
   // Copy into a plain ArrayBuffer: the transferred view may sit inside a larger buffer.
   const copy = new Uint8Array(bytes.byteLength)
   copy.set(bytes)
-  const url = URL.createObjectURL(new Blob([copy.buffer], { type: 'image/jpeg' }))
+  const isPng =
+    copy[0] === 0x89 && copy[1] === 0x50 && copy[2] === 0x4e && copy[3] === 0x47
+  const type = isPng ? 'image/png' : 'image/jpeg'
+  const url = URL.createObjectURL(new Blob([copy.buffer], { type }))
   const release = (): void => URL.revokeObjectURL(url)
   // Revoke on success and on failure alike, so a bad image does not leak the URL.
   return new THREE.TextureLoader().load(url, release, undefined, release)
@@ -2099,6 +2419,126 @@ export function buildCutoutGeometry(
   const geometry = new THREE.BufferGeometry()
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  return geometry
+}
+
+/**
+ * A quad tangent to the celestial sphere, centred on `centre` and spanning
+ * `angularRadius` degrees, with its axes taken from the body's own frame.
+ *
+ * The lit-sphere shader reads the quad's uv as a position on the unit disc, so the
+ * frame's `y` axis becoming "up" in uv space is what puts the body's pole at the top of
+ * the drawn sphere. A modest tessellation keeps the quad following the curve of the sky
+ * at very high magnification.
+ */
+export function buildDiscGeometry(
+  centre: Vec3,
+  frame: { x: Vec3; y: Vec3; z: Vec3 },
+  angularRadius: number,
+  segments = 12
+): THREE.BufferGeometry {
+  const c = new THREE.Vector3(centre.x, centre.y, centre.z).normalize()
+  const ax = new THREE.Vector3(frame.x.x, frame.x.y, frame.x.z)
+  const ay = new THREE.Vector3(frame.y.x, frame.y.y, frame.y.z)
+  const half = Math.tan(angularRadius * DEG)
+
+  const positions: number[] = []
+  const uvs: number[] = []
+  const indices: number[] = []
+
+  for (let row = 0; row <= segments; row++) {
+    for (let column = 0; column <= segments; column++) {
+      const u = column / segments
+      const v = row / segments
+      const direction = c
+        .clone()
+        .addScaledVector(ax, (u - 0.5) * 2 * half)
+        .addScaledVector(ay, (v - 0.5) * 2 * half)
+        .normalize()
+        .multiplyScalar(SKY_RADIUS * 0.99)
+      positions.push(direction.x, direction.y, direction.z)
+      uvs.push(u, v)
+    }
+  }
+
+  const stride = segments + 1
+  for (let row = 0; row < segments; row++) {
+    for (let column = 0; column < segments; column++) {
+      const a = row * stride + column
+      indices.push(a, a + stride, a + 1, a + 1, a + stride, a + stride + 1)
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
+  geometry.setIndex(indices)
+  return geometry
+}
+
+/**
+ * An annulus lying in a body's equatorial plane, projected onto the sky.
+ *
+ * Ring points are built in kilometres relative to the planet's centre, then added to
+ * the Earth-to-planet vector before being normalised. That is what produces the correct
+ * ellipse and the correct tilt without either being drawn by hand.
+ */
+export function buildRingGeometry(
+  centreDirection: Vec3,
+  frame: { x: Vec3; y: Vec3; z: Vec3 },
+  appearance: { primeMeridian: Vec3; eastward: Vec3 },
+  distanceKm: number,
+  planetRadiusKm: number,
+  innerKm: number,
+  outerKm: number,
+  segments = 192
+): THREE.BufferGeometry {
+  const toKm = (v: Vec3, k: number): THREE.Vector3 =>
+    new THREE.Vector3(v.x * k, v.y * k, v.z * k)
+  const a = appearance.primeMeridian
+  const b = appearance.eastward
+  const centre = new THREE.Vector3(
+    centreDirection.x,
+    centreDirection.y,
+    centreDirection.z
+  )
+    .normalize()
+    .multiplyScalar(distanceKm)
+
+  const positions: number[] = []
+  const local: number[] = []
+  const radial: number[] = []
+  const indices: number[] = []
+
+  for (let i = 0; i <= segments; i++) {
+    const theta = (i / segments) * Math.PI * 2
+    for (let edge = 0; edge < 2; edge++) {
+      const r = edge === 0 ? innerKm : outerKm
+      const offset = toKm(a, r * Math.cos(theta)).add(toKm(b, r * Math.sin(theta)))
+      // Apparent direction of this ring point as seen from Earth.
+      const direction = centre.clone().add(offset).normalize().multiplyScalar(SKY_RADIUS * 0.99)
+      positions.push(direction.x, direction.y, direction.z)
+
+      // The same offset in the planet's own frame, measured in planet radii.
+      local.push(
+        (offset.x * frame.x.x + offset.y * frame.x.y + offset.z * frame.x.z) / planetRadiusKm,
+        (offset.x * frame.y.x + offset.y * frame.y.y + offset.z * frame.y.z) / planetRadiusKm,
+        (offset.x * frame.z.x + offset.y * frame.z.y + offset.z * frame.z.z) / planetRadiusKm
+      )
+      radial.push(edge)
+    }
+  }
+
+  for (let i = 0; i < segments; i++) {
+    const base = i * 2
+    indices.push(base, base + 1, base + 2, base + 1, base + 3, base + 2)
+  }
+
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+  geometry.setAttribute('ringLocal', new THREE.Float32BufferAttribute(local, 3))
+  geometry.setAttribute('radial', new THREE.Float32BufferAttribute(radial, 1))
   geometry.setIndex(indices)
   return geometry
 }

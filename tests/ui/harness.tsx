@@ -18,6 +18,7 @@ export const bridge = {
   })),
   networkStatus: vi.fn(async () => ({ online: true, lastCheckedAt: new Date().toISOString() })),
   getSkyImage: vi.fn(async () => null),
+  getBodyTexture: vi.fn(async () => null),
   getObjectImage: vi.fn(async () => ({
     objectId: 'test',
     fovDegrees: 1,

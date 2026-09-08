@@ -23,6 +23,27 @@ const FETCH_TIMEOUT_MS = 25000
 const CUTOUT_PIXELS = 512
 
 let skyImageCache: Buffer | null = null
+const textureCache = new Map<string, Buffer | null>()
+
+/** Surface map for one Solar System body, or null when it is not bundled. */
+export function readBodyTexture(id: string): Buffer | null {
+  // Ids come from the catalogue ("jupiter", "saturn-ring"), so keep them to that shape
+  // rather than trusting them as a path fragment.
+  if (!/^[a-z-]{2,20}$/.test(id)) return null
+  if (textureCache.has(id)) return textureCache.get(id) ?? null
+
+  const dir = path.join(catalogDirectory(), 'textures')
+  for (const ext of ['jpg', 'png']) {
+    const file = path.join(dir, `${id}.${ext}`)
+    if (existsSync(file)) {
+      const bytes = readFileSync(file)
+      textureCache.set(id, bytes)
+      return bytes
+    }
+  }
+  textureCache.set(id, null)
+  return null
+}
 
 /** The bundled all-sky panorama, or null when the data build has not been run. */
 export function readSkyImage(): Buffer | null {
