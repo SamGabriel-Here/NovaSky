@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { NavRail } from '@renderer/components/NavRail'
 import { ZenMode } from '@renderer/components/ZenMode'
 import { useAppStore } from '@renderer/state/useAppStore'
 import { bridge, seedStore } from './harness'
@@ -107,5 +109,25 @@ describe('locking on', () => {
     await useAppStore.getState().setZenMode(true)
     render(<ZenMode />)
     expect(screen.getByText(/Royal Observatory, Greenwich/)).toBeInTheDocument()
+  })
+})
+
+describe('reaching zen mode from the sidebar', () => {
+  it('offers it below the screens, since it is not one of them', () => {
+    seedStore()
+    render(<NavRail />)
+    const zen = screen.getByRole('button', { name: /zen/i })
+    // The screen list is a set of pages; zen mode replaces the window instead.
+    expect(zen).not.toHaveAttribute('aria-current')
+  })
+
+  it('goes fullscreen when clicked, the same as pressing Z', async () => {
+    seedStore()
+    render(<NavRail />)
+
+    await userEvent.click(screen.getByRole('button', { name: /zen/i }))
+
+    await waitFor(() => expect(useAppStore.getState().zenMode).toBe(true))
+    expect(bridge.setFullscreen).toHaveBeenCalledWith(true)
   })
 })

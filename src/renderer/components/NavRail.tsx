@@ -16,6 +16,7 @@ const ICONS: Record<Screen, IconName> = {
 export function NavRail(): JSX.Element {
   const screen = useAppStore((s) => s.screen)
   const setScreen = useAppStore((s) => s.setScreen)
+  const setZenMode = useAppStore((s) => s.setZenMode)
   const beginnerMode = useAppStore((s) => s.settings.beginnerMode)
 
   return (
@@ -58,6 +59,23 @@ export function NavRail(): JSX.Element {
           </Tooltip>
         )
       })}
+
+      {/*
+        Zen mode is not a screen, so it sits under the screen list behind a rule rather
+        than in it: it takes the whole window over and there is nothing to come back to
+        except the sky.
+      */}
+      <div className="mt-2 w-[46px] shrink-0 border-t border-space-800" aria-hidden="true" />
+      <Tooltip label="Zen mode: fullscreen sky, aimed with a crosshair (Z)" side="right">
+        <button
+          type="button"
+          onClick={() => void setZenMode(true)}
+          className="mt-2 flex w-[60px] flex-col items-center gap-1 rounded-lg px-1 py-2 text-[11px] text-slate-400 transition-colors duration-150 hover:bg-space-800 hover:text-slate-200"
+        >
+          <Icon name="zen" size={20} />
+          Zen
+        </button>
+      </Tooltip>
 
       <div className="mt-auto flex flex-col items-center gap-2 pb-1">
         {beginnerMode && (

@@ -4,7 +4,7 @@
  * The renderer owns the WebGL context and the label DOM; this component only feeds it
  * state changes and forwards user intent back into the store.
  */
-import { useEffect, useRef, useState, type JSX } from 'react'
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react'
 import { SkyRenderer, type CameraState, type SkyOptions } from './SkyRenderer'
 import { getSatelliteState, type SatelliteState } from '@shared/astro/satellites'
 import { azimuthToCardinal } from '@shared/astro/coords'
@@ -58,6 +58,28 @@ export function SkyCanvas(): JSX.Element {
   const setAimed = useAppStore((s) => s.setAimed)
   const [camera, setCamera] = useState<CameraState>({ altitude: 35, azimuth: 180, fov: 65 })
 
+  /**
+   * The live camera, and a React copy of it that lags by at most one frame.
+   *
+   * The renderer reports a new camera on every pointer move and every frame of an
+   * animation. Pushing each of those straight into React state re-rendered the whole
+   * canvas tree faster than the screen refreshes, which is what made dragging and the
+   * arrow keys feel heavy. Everything that needs the camera right now reads the ref;
+   * React hears about it once per frame, and not at all in zen mode, where nothing on
+   * screen shows the readout.
+   */
+  const cameraRef = useRef<CameraState>(camera)
+  const zenModeRef = useRef(false)
+  const cameraFlush = useRef(0)
+  const publishCamera = useCallback((next: CameraState): void => {
+    cameraRef.current = next
+    if (zenModeRef.current || cameraFlush.current) return
+    cameraFlush.current = requestAnimationFrame(() => {
+      cameraFlush.current = 0
+      setCamera(cameraRef.current)
+    })
+  }, [])
+
   const options: SkyOptions = {
     starMagnitudeLimit: settings.starMagnitudeLimit,
     showConstellationLines: settings.showConstellationLines,
@@ -83,7 +105,7 @@ export function SkyCanvas(): JSX.Element {
       settings.location,
       options,
       {
-        onCameraChange: setCamera,
+        onCameraChange: publishCamera,
         onSelect: (id) => select(id)
       }
     )
@@ -96,6 +118,8 @@ export function SkyCanvas(): JSX.Element {
       observer.disconnect()
       renderer.dispose()
       rendererRef.current = null
+      if (cameraFlush.current) cancelAnimationFrame(cameraFlush.current)
+      cameraFlush.current = 0
     }
     // Deliberately mounts once; subsequent updates flow through the effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -147,22 +171,50 @@ export function SkyCanvas(): JSX.Element {
   /**
    * The crosshair reads whatever is at the centre of the view.
    *
-   * Polling a few times a second is deliberate: the camera reports a new state on every
-   * animation frame, and re-picking at that rate would do sixty times the work for a
-   * readout nobody can read that fast.
+   * This used to run off a timer, which meant the name under the reticle arrived up to
+   * a tenth of a second after the sky had already moved. It now re-picks on the frame
+   * the view changes, and skips the work entirely while the view is still. The sky also
+   * turns on its own as time runs, so a slow heartbeat catches an object drifting into
+   * the crosshair while nothing is being touched.
    */
   useEffect(() => {
+    zenModeRef.current = zenMode
     if (!zenMode) {
       rendererRef.current?.setCrosshairMode(false)
       setAimed(null)
+      setCamera(cameraRef.current)
       return
     }
     rendererRef.current?.setCrosshairMode(true)
-    const update = (): void => setAimed(rendererRef.current?.pickCentre() ?? null)
-    update()
-    const timer = setInterval(update, 120)
+
+    let frame = 0
+    let lastView = ''
+    let lastId: string | null = null
+    let lastPickAt = 0
+    let first = true
+
+    const tick = (now: number): void => {
+      frame = requestAnimationFrame(tick)
+      const renderer = rendererRef.current
+      if (!renderer) return
+      const { altitude, azimuth, fov } = cameraRef.current
+      const view = `${altitude.toFixed(3)}|${azimuth.toFixed(3)}|${fov.toFixed(3)}`
+      if (!first && view === lastView && now - lastPickAt < 500) return
+      lastView = view
+      lastPickAt = now
+      const id = renderer.pickCentre()
+      // Only touch the store when the answer changes, so a drag does not re-render the
+      // overlay sixty times a second to write the same name.
+      if (first || id !== lastId) {
+        lastId = id
+        setAimed(id)
+      }
+      first = false
+    }
+    frame = requestAnimationFrame(tick)
+
     return () => {
-      clearInterval(timer)
+      cancelAnimationFrame(frame)
       rendererRef.current?.setCrosshairMode(false)
       setAimed(null)
     }
@@ -307,45 +359,113 @@ export function SkyCanvas(): JSX.Element {
     return () => clearInterval(timer)
   }, [settings.showSatellites, tle, settings.location])
 
-  // Keyboard navigation for the map itself.
+  /**
+   * Keyboard navigation for the map itself.
+   *
+   * Held keys glide rather than step. Panning used to jump five degrees per keydown and
+   * lean on the operating system's key repeat, so a tap lurched and a hold sat still for
+   * half a second before machine-gunning. Now a key going down starts a loop that moves
+   * the sky a distance proportional to the frame it just drew, and lifting it stops.
+   *
+   * The rate scales with the field of view, so the sky travels roughly the same fraction
+   * of the screen per second whether you are looking at a constellation or at Saturn's
+   * rings, and holding shift roughly triples it.
+   */
   useEffect(() => {
+    /** Degrees per second at a given field of view, and zoom factors per second. */
+    const PAN_RATE = 0.85
+    const FAST_MULTIPLIER = 3
+    const ZOOM_RATE = 1.9
+
+    const held = new Set<string>()
+    let frame = 0
+    let previous = 0
+    let fast = false
+
+    const stop = (): void => {
+      if (frame) cancelAnimationFrame(frame)
+      frame = 0
+      held.clear()
+    }
+
+    const tick = (now: number): void => {
+      const renderer = rendererRef.current
+      if (!renderer || held.size === 0) {
+        frame = 0
+        return
+      }
+      frame = requestAnimationFrame(tick)
+      // Clamped so a backgrounded window does not resume with one enormous jump.
+      const seconds = Math.min(0.05, (now - previous) / 1000)
+      previous = now
+
+      const rate = cameraRef.current.fov * PAN_RATE * (fast ? FAST_MULTIPLIER : 1) * seconds
+      let azimuth = 0
+      let altitude = 0
+      if (held.has('ArrowLeft')) azimuth -= rate
+      if (held.has('ArrowRight')) azimuth += rate
+      if (held.has('ArrowUp')) altitude += rate
+      if (held.has('ArrowDown')) altitude -= rate
+      if (azimuth !== 0 || altitude !== 0) renderer.pan(azimuth, altitude)
+
+      if (held.has('in')) renderer.zoomBy(Math.pow(1 / ZOOM_RATE, seconds))
+      if (held.has('out')) renderer.zoomBy(Math.pow(ZOOM_RATE, seconds))
+    }
+
+    const start = (): void => {
+      if (frame) return
+      previous = performance.now()
+      frame = requestAnimationFrame(tick)
+    }
+
+    /** The keys that glide, mapped to what the loop looks for. */
+    const glideKey = (key: string): string | null => {
+      if (key === 'ArrowLeft' || key === 'ArrowRight' || key === 'ArrowUp' || key === 'ArrowDown') {
+        return key
+      }
+      if (key === '+' || key === '=') return 'in'
+      if (key === '-' || key === '_') return 'out'
+      return null
+    }
+
     const onKeyDown = (event: KeyboardEvent): void => {
       const target = event.target as HTMLElement | null
       if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return
-      const renderer = rendererRef.current
-      if (!renderer) return
-      const step = event.shiftKey ? 15 : 5
-      switch (event.key) {
-        case 'ArrowLeft':
-          renderer.pan(-step, 0)
-          break
-        case 'ArrowRight':
-          renderer.pan(step, 0)
-          break
-        case 'ArrowUp':
-          renderer.pan(0, step)
-          break
-        case 'ArrowDown':
-          renderer.pan(0, -step)
-          break
-        case '+':
-        case '=':
-          renderer.zoomBy(0.8)
-          break
-        case '-':
-        case '_':
-          renderer.zoomBy(1.25)
-          break
-        case '0':
-          renderer.resetView()
-          break
-        default:
-          return
+      if (!rendererRef.current) return
+      fast = event.shiftKey
+
+      if (event.key === '0') {
+        rendererRef.current.resetView()
+        event.preventDefault()
+        return
       }
+
+      const key = glideKey(event.key)
+      if (!key) return
       event.preventDefault()
+      // The operating system's own repeat would only fight the loop.
+      if (event.repeat) return
+      held.add(key)
+      start()
     }
+
+    const onKeyUp = (event: KeyboardEvent): void => {
+      fast = event.shiftKey
+      const key = glideKey(event.key)
+      if (key) held.delete(key)
+    }
+
+    // A key held while the window loses focus never sends its keyup, so the sky would
+    // otherwise drift forever.
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('blur', stop)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('blur', stop)
+      stop()
+    }
   }, [])
 
   return (

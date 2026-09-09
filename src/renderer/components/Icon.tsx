@@ -25,6 +25,7 @@ export type IconName =
   | 'check'
   | 'trophy'
   | 'info'
+  | 'zen'
 
 const PATHS: Record<IconName, JSX.Element> = {
   sky: (
@@ -138,6 +139,14 @@ const PATHS: Record<IconName, JSX.Element> = {
     <>
       <circle cx="12" cy="12" r="8.5" />
       <path d="M12 11v5.5M12 7.8v.4" />
+    </>
+  ),
+  // The zen reticle, with the same gap in the middle as the one on the sky.
+  zen: (
+    <>
+      <circle cx="12" cy="12" r="6.5" />
+      <path d="M12 2.5v3.5M12 18v3.5M2.5 12h3.5M18 12h3.5" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
     </>
   )
 }

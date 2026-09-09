@@ -139,7 +139,11 @@ data section reports exactly what is stored locally and how old it is.
 
 ### Zen mode
 
-Pressing `Z` removes the application. No rail, no bar, no panels, no cursor: a fullscreen
+Reached by `Z` or by the entry under the rule at the bottom of the sidebar, which sits
+apart from the screen list because zen mode is not a screen: it takes the window over,
+and there is nothing to come back to except the sky.
+
+Zen mode removes the application. No rail, no bar, no panels, no cursor: a fullscreen
 sky with a crosshair at the centre. It is aimed rather than pointed at, so the pointer is
 demoted to a way of swinging the view and the centre of the screen does the selecting.
 
@@ -151,6 +155,12 @@ azimuth, magnitude, distance, set time.
 
 Escape peels one layer at a time rather than dumping you out, so a stray press while a
 card is open never throws away the whole mode.
+
+Held keys glide instead of stepping. Aiming with a crosshair means the arrows are a
+primary control rather than a convenience, and a fixed jump per keypress leaning on the
+operating system's key repeat cannot be aimed with: a tap lurches, and a hold sits still
+before machine-gunning. The rate scales with the field of view, so the sky travels about
+the same fraction of the screen per second at any magnification.
 
 ## The sky map's visual language
 

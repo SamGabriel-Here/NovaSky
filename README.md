@@ -38,11 +38,11 @@ where you are, checked against tonight's real dark window rather than the clock.
 covers eclipses, meteor showers, conjunctions, oppositions, lunar phases and the
 solstices, and says for each one whether you can see it from your location.
 
-Press `Z` for zen mode and the window becomes nothing but sky. The rail, the bar and
-every panel go away, the cursor disappears, and a crosshair sits in the middle. Drag or
-use the arrow keys to swing it around; whatever it lands on is named under the reticle,
-and Enter locks on and brings up a single compact card. Escape steps back out one layer
-at a time.
+Press `Z`, or pick Zen at the bottom of the sidebar, and the window becomes nothing but
+sky. The rail, the bar and every panel go away, the cursor disappears, and a crosshair
+sits in the middle. Drag or hold the arrow keys to swing it around; whatever it lands on
+is named under the reticle, and Enter locks on and brings up a single compact card.
+Escape steps back out one layer at a time.
 
 ![Zen mode, locked on to Betelgeuse](docs/screenshots/20-zen-locked.png)
 
