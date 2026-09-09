@@ -77,8 +77,14 @@ jobs:
           # into an array rather than letting the shell split the file list.
           mapfile -t files < <(find dist -type f | sort)
           printf 'attaching %s\n' "${files[@]}"
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "NovaSky ${GITHUB_REF_NAME}" \
-            --generate-notes \
-            --verify-tag \
-            "${files[@]}"
+          # Re-running the workflow on a tag that already has a release must not
+          # fail: `gh release create` errors out on an existing tag, which is what
+          # broke every re-run of v0.1.0. Create it only if it is missing, then
+          # upload with --clobber so a retry replaces the assets it uploaded before.
+          if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "NovaSky ${GITHUB_REF_NAME}" \
+              --generate-notes \
+              --verify-tag
+          fi
+          gh release upload "${GITHUB_REF_NAME}" --clobber "${files[@]}"
