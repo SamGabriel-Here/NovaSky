@@ -317,6 +317,8 @@ export function SettingsScreen(): JSX.Element {
               ['S', 'Focus search'],
               ['B', 'Toggle beginner mode'],
               ['F', 'Toggle fullscreen'],
+              ['Z', 'Zen mode: fullscreen sky, aimed with a crosshair'],
+              ['Enter', 'In zen mode, lock on to the crosshair target'],
               ['Esc', 'Close panels'],
               ['Arrow keys', 'Look around the sky'],
               ['+ / −', 'Zoom in and out'],

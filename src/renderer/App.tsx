@@ -8,6 +8,8 @@ import { TopBar } from './components/TopBar'
 import { SearchPalette } from './components/SearchPalette'
 import { Onboarding } from './components/Onboarding'
 import { Toast } from './components/Toast'
+import { ZenMode } from './components/ZenMode'
+import { SkyCanvas } from './sky/SkyCanvas'
 import { ErrorState } from './components/ui'
 import { SkyScreen } from './screens/SkyScreen'
 import { SearchScreen } from './screens/SearchScreen'
@@ -45,9 +47,19 @@ function useShortcuts(): void {
         (['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable)
 
       if (event.key === 'Escape') {
+        // Escape peels one layer at a time, so it never drops out of zen mode while
+        // something is still open on top of it.
         if (state.searchOpen) state.setSearchOpen(false)
         else if (state.timeMachineOpen) state.setTimeMachineOpen(false)
         else if (state.selectedId) state.select(null)
+        else if (state.zenMode) void state.setZenMode(false)
+        return
+      }
+
+      // Commit to whatever the crosshair is on.
+      if (state.zenMode && (event.key === 'Enter' || event.key === ' ') && !typing) {
+        event.preventDefault()
+        if (state.aimedId) state.select(state.aimedId)
         return
       }
 
@@ -70,6 +82,10 @@ function useShortcuts(): void {
         case 'f':
           event.preventDefault()
           void window.novasky.toggleFullscreen()
+          break
+        case 'z':
+          event.preventDefault()
+          void state.setZenMode(!state.zenMode)
           break
         default:
           break
@@ -144,6 +160,7 @@ export function App(): JSX.Element {
   const status = useAppStore((s) => s.status)
   const error = useAppStore((s) => s.error)
   const platform = useAppStore((s) => s.platform)
+  const zenMode = useAppStore((s) => s.zenMode)
   const initialise = useAppStore((s) => s.initialise)
 
   useEffect(() => {
@@ -175,6 +192,18 @@ export function App(): JSX.Element {
             in the project directory to download them, then restart the app.
           </p>
         </div>
+      </div>
+    )
+  }
+
+  // Zen mode is the sky and nothing else: no rail, no bar, no screen chrome.
+  if (zenMode) {
+    return (
+      <div className="h-full bg-space-950">
+        <SkyCanvas />
+        <ZenMode />
+        <SearchPalette />
+        <Toast />
       </div>
     )
   }

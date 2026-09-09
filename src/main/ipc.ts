@@ -150,6 +150,15 @@ export function registerIpc(context: IpcContext): void {
     }
   })
 
+  // Zen mode needs to set fullscreen rather than flip it, so that entering twice or
+  // leaving from an already-windowed state cannot land the window in the wrong one.
+  ipcMain.handle('window:set-fullscreen', (_event, fullscreen: boolean): boolean => {
+    const window = context.getWindow()
+    if (!window) return false
+    window.setFullScreen(fullscreen)
+    return fullscreen
+  })
+
   ipcMain.handle('window:toggle-fullscreen', (): boolean => {
     const window = context.getWindow()
     if (!window) return false

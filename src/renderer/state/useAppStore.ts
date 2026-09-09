@@ -65,6 +65,10 @@ interface AppState {
   searchOpen: boolean
   timeMachineOpen: boolean
   onboardingOpen: boolean
+  /** Fullscreen sky with no chrome, aimed with a crosshair. */
+  zenMode: boolean
+  /** The object currently under the crosshair, which is not the same as selected. */
+  aimedId: string | null
 
   tle: TleBundle | null
   tleLoading: boolean
@@ -85,6 +89,8 @@ interface AppState {
   toggleBeginnerMode: () => Promise<void>
   setSearchOpen: (open: boolean) => void
   setTimeMachineOpen: (open: boolean) => void
+  setZenMode: (on: boolean) => Promise<void>
+  setAimed: (objectId: string | null) => void
   completeOnboarding: () => Promise<void>
   reopenOnboarding: () => void
   refreshTle: (force?: boolean) => Promise<void>
@@ -124,6 +130,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   searchOpen: false,
   timeMachineOpen: false,
   onboardingOpen: false,
+  zenMode: false,
+  aimedId: null,
   focusRequest: null,
 
   tle: null,
@@ -195,6 +203,36 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setSearchOpen: (searchOpen) => set({ searchOpen }),
   setTimeMachineOpen: (timeMachineOpen) => set({ timeMachineOpen }),
+
+  /**
+   * Zen mode: the whole window becomes the sky.
+   *
+   * Everything that could sit on top of it is closed on the way in, and the selection
+   * is dropped on the way out so the ordinary layout does not come back with a details
+   * panel already open.
+   */
+  async setZenMode(on) {
+    if (on) {
+      set({
+        zenMode: true,
+        screen: 'sky',
+        searchOpen: false,
+        timeMachineOpen: false,
+        selectedId: null,
+        aimedId: null
+      })
+    } else {
+      set({ zenMode: false, aimedId: null, selectedId: null })
+    }
+    try {
+      await window.novasky.setFullscreen(on)
+    } catch {
+      // A window manager that refuses fullscreen should not strand the UI, so zen mode
+      // stays on either way and simply runs inside the existing window.
+    }
+  },
+
+  setAimed: (aimedId) => set({ aimedId }),
 
   async completeOnboarding() {
     set({ onboardingOpen: false })

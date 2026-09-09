@@ -32,7 +32,8 @@ export const bridge = {
   scheduledNotifications: vi.fn(async () => []),
   clearData: vi.fn(async () => DEFAULT_SETTINGS),
   openExternal: vi.fn(async () => true),
-  toggleFullscreen: vi.fn(async () => true)
+  toggleFullscreen: vi.fn(async () => true),
+  setFullscreen: vi.fn(async (on: boolean) => on)
 }
 
 /** Puts the store into a known, ready state with the real catalogue loaded. */

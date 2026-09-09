@@ -713,6 +713,8 @@ export class SkyRenderer {
   private disposed = false
   private animation: { target: CameraState; start: CameraState; startedAt: number; duration: number } | null = null
   private pointerDown: { x: number; y: number; moved: boolean } | null = null
+  /** In crosshair mode the pointer only looks around; the centre does the aiming. */
+  private crosshair = false
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -853,6 +855,28 @@ export class SkyRenderer {
   setFov(fov: number): void {
     this.cameraState.fov = Math.min(MAX_FOV, Math.max(MIN_FOV, fov))
     this.callbacks.onCameraChange?.(this.getCameraState())
+  }
+
+  /**
+   * Crosshair aiming, for zen mode.
+   *
+   * The cursor is hidden and a click commits to whatever is at the centre of the view
+   * rather than under the pointer, so there is only ever one thing doing the aiming.
+   */
+  setCrosshairMode(on: boolean): void {
+    this.crosshair = on
+    this.canvas.style.cursor = on ? 'none' : 'grab'
+  }
+
+  /**
+   * Whatever the middle of the view is pointing at.
+   *
+   * Zen mode aims with a fixed crosshair rather than a cursor, so the pick happens at
+   * the centre of the canvas. Picking is a dot product against every candidate, so
+   * calling this several times a second costs nothing worth measuring.
+   */
+  pickCentre(): string | null {
+    return this.pick((this.canvas.clientWidth || 0) / 2, (this.canvas.clientHeight || 0) / 2)
   }
 
   /** Nudges the camera, used by the arrow-key handlers. */
@@ -2207,6 +2231,7 @@ export class SkyRenderer {
 
   private onPointerMove = (event: PointerEvent): void => {
     if (!this.pointerDown) {
+      if (this.crosshair) return
       const id = this.pick(event.offsetX, event.offsetY)
       this.callbacks.onHover?.(id)
       this.canvas.style.cursor = id ? 'pointer' : 'grab'
@@ -2220,16 +2245,18 @@ export class SkyRenderer {
     // Drag scales with the field of view so the sky tracks the cursor at any zoom.
     const scale = this.cameraState.fov / (this.canvas.clientHeight || 1)
     this.applyPan(-dx * scale, dy * scale)
-    this.canvas.style.cursor = 'grabbing'
+    if (!this.crosshair) this.canvas.style.cursor = 'grabbing'
   }
 
   private onPointerUp = (event: PointerEvent): void => {
     const wasDrag = this.pointerDown?.moved ?? false
     this.pointerDown = null
     this.canvas.releasePointerCapture?.(event.pointerId)
-    this.canvas.style.cursor = 'grab'
+    this.canvas.style.cursor = this.crosshair ? 'none' : 'grab'
     if (!wasDrag) {
-      this.callbacks.onSelect?.(this.pick(event.offsetX, event.offsetY))
+      this.callbacks.onSelect?.(
+        this.crosshair ? this.pickCentre() : this.pick(event.offsetX, event.offsetY)
+      )
     }
   }
 

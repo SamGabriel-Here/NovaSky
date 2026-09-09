@@ -42,7 +42,9 @@ const api = {
     ipcRenderer.invoke('notifications:scheduled'),
   clearData: (scope: 'cache' | 'all'): Promise<Settings> => ipcRenderer.invoke('data:clear', scope),
   openExternal: (url: string): Promise<boolean> => ipcRenderer.invoke('shell:open-external', url),
-  toggleFullscreen: (): Promise<boolean> => ipcRenderer.invoke('window:toggle-fullscreen')
+  toggleFullscreen: (): Promise<boolean> => ipcRenderer.invoke('window:toggle-fullscreen'),
+  setFullscreen: (fullscreen: boolean): Promise<boolean> =>
+    ipcRenderer.invoke('window:set-fullscreen', fullscreen)
 }
 
 export type NovaSkyApi = typeof api

@@ -54,6 +54,8 @@ export function SkyCanvas(): JSX.Element {
   const tle = useAppStore((s) => s.tle)
 
   const timeMachineOpen = useAppStore((s) => s.timeMachineOpen)
+  const zenMode = useAppStore((s) => s.zenMode)
+  const setAimed = useAppStore((s) => s.setAimed)
   const [camera, setCamera] = useState<CameraState>({ altitude: 35, azimuth: 180, fov: 65 })
 
   const options: SkyOptions = {
@@ -141,6 +143,30 @@ export function SkyCanvas(): JSX.Element {
     const object = catalog.objects.get(focusRequest.id)
     if (object) rendererRef.current?.focusOnObject(object)
   }, [focusRequest, catalog])
+
+  /**
+   * The crosshair reads whatever is at the centre of the view.
+   *
+   * Polling a few times a second is deliberate: the camera reports a new state on every
+   * animation frame, and re-picking at that rate would do sixty times the work for a
+   * readout nobody can read that fast.
+   */
+  useEffect(() => {
+    if (!zenMode) {
+      rendererRef.current?.setCrosshairMode(false)
+      setAimed(null)
+      return
+    }
+    rendererRef.current?.setCrosshairMode(true)
+    const update = (): void => setAimed(rendererRef.current?.pickCentre() ?? null)
+    update()
+    const timer = setInterval(update, 120)
+    return () => {
+      clearInterval(timer)
+      rendererRef.current?.setCrosshairMode(false)
+      setAimed(null)
+    }
+  }, [zenMode, setAimed])
 
   // Surface maps for the Solar System, fetched once each. A body without one keeps its
   // plain marker, so a missing texture degrades quietly.
@@ -333,7 +359,7 @@ export function SkyCanvas(): JSX.Element {
       />
       <div ref={overlayRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true" />
 
-      {imageryNote && (
+      {imageryNote && !zenMode && (
         <div
           className={`pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate rounded-lg border border-space-700/70 bg-space-950/80 px-3 py-1.5 text-[11px] text-slate-300 backdrop-blur transition-[bottom] duration-200 ${
             timeMachineOpen ? 'bottom-[10.5rem]' : 'bottom-3'
@@ -343,48 +369,57 @@ export function SkyCanvas(): JSX.Element {
         </div>
       )}
 
-      {/* Lifted clear of the Time Machine panel while it is open. */}
-      <div
-        className={`pointer-events-none absolute left-3 rounded-lg border border-space-700/70 bg-space-950/70 px-2.5 py-1.5 font-mono text-[11px] text-slate-400 backdrop-blur transition-[bottom] duration-200 ${
-          timeMachineOpen ? 'bottom-[10.5rem]' : 'bottom-3'
-        }`}
-      >
-        Looking {azimuthToCardinal(camera.azimuth)} · alt {camera.altitude.toFixed(0)}° · field{' '}
-        {camera.fov.toFixed(0)}°
-      </div>
+      {/*
+        Lifted clear of the Time Machine panel while it is open. Zen mode drops both of
+        these blocks rather than setting `hidden` on them: `hidden` is only a UA rule, so
+        a Tailwind display utility on the same element outranks it and the controls stay
+        on screen.
+      */}
+      {!zenMode && (
+        <>
+          <div
+            className={`pointer-events-none absolute left-3 rounded-lg border border-space-700/70 bg-space-950/70 px-2.5 py-1.5 font-mono text-[11px] text-slate-400 backdrop-blur transition-[bottom] duration-200 ${
+              timeMachineOpen ? 'bottom-[10.5rem]' : 'bottom-3'
+            }`}
+          >
+            Looking {azimuthToCardinal(camera.azimuth)} · alt {camera.altitude.toFixed(0)}° · field{' '}
+            {camera.fov.toFixed(0)}°
+          </div>
 
-      <div className="absolute right-3 top-3 flex flex-col gap-1.5">
-        <Tooltip label="Zoom in (+)" side="right">
-          <button
-            type="button"
-            onClick={() => rendererRef.current?.zoomBy(0.75)}
-            aria-label="Zoom in"
-            className="btn-ghost !px-2 !py-2"
-          >
-            <Icon name="zoom-in" size={16} />
-          </button>
-        </Tooltip>
-        <Tooltip label="Zoom out (−)" side="right">
-          <button
-            type="button"
-            onClick={() => rendererRef.current?.zoomBy(1.33)}
-            aria-label="Zoom out"
-            className="btn-ghost !px-2 !py-2"
-          >
-            <Icon name="zoom-out" size={16} />
-          </button>
-        </Tooltip>
-        <Tooltip label="Reset the view to south, 35° up (0)" side="right">
-          <button
-            type="button"
-            onClick={() => rendererRef.current?.resetView()}
-            aria-label="Reset view"
-            className="btn-ghost !px-2 !py-2"
-          >
-            <Icon name="reset" size={16} />
-          </button>
-        </Tooltip>
-      </div>
+          <div className="absolute right-3 top-3 flex flex-col gap-1.5">
+            <Tooltip label="Zoom in (+)" side="right">
+              <button
+                type="button"
+                onClick={() => rendererRef.current?.zoomBy(0.75)}
+                aria-label="Zoom in"
+                className="btn-ghost !px-2 !py-2"
+              >
+                <Icon name="zoom-in" size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip label="Zoom out (−)" side="right">
+              <button
+                type="button"
+                onClick={() => rendererRef.current?.zoomBy(1.33)}
+                aria-label="Zoom out"
+                className="btn-ghost !px-2 !py-2"
+              >
+                <Icon name="zoom-out" size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip label="Reset the view to south, 35° up (0)" side="right">
+              <button
+                type="button"
+                onClick={() => rendererRef.current?.resetView()}
+                aria-label="Reset view"
+                className="btn-ghost !px-2 !py-2"
+              >
+                <Icon name="reset" size={16} />
+              </button>
+            </Tooltip>
+          </div>
+        </>
+      )}
     </div>
   )
 }

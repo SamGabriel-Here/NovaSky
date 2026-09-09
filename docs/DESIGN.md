@@ -137,6 +137,21 @@ A full screen with filters, plus a command-palette overlay on `S` from anywhere.
 Location, display, notifications, data and privacy, and the shortcut reference. The
 data section reports exactly what is stored locally and how old it is.
 
+### Zen mode
+
+Pressing `Z` removes the application. No rail, no bar, no panels, no cursor: a fullscreen
+sky with a crosshair at the centre. It is aimed rather than pointed at, so the pointer is
+demoted to a way of swinging the view and the centre of the screen does the selecting.
+
+The reticle keeps a gap in the middle so it never covers what it is pointing at, and it
+goes from a dashed ring to a solid one once you commit to a target. Naming happens under
+the crosshair, where the eye already is, rather than in a panel at the edge. Committing
+opens one card at the bottom with the handful of figures worth having outdoors: altitude,
+azimuth, magnitude, distance, set time.
+
+Escape peels one layer at a time rather than dumping you out, so a stray press while a
+card is open never throws away the whole mode.
+
 ## The sky map's visual language
 
 Everything on the map is drawn from real catalogue values. The only exaggerations are a

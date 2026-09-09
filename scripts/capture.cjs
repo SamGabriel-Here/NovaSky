@@ -237,6 +237,34 @@ app.whenReady().then(async () => {
   await shootBody('17-jupiter', 'jupiter', '2027-01-15T02:00:00Z', 24)
   await shootBody('18-saturn', 'saturn', '2027-01-15T02:00:00Z', 29)
 
+  // --- zen mode ----------------------------------------------------------
+  await run(`
+    (async () => {
+      const s = window.__novaskyStore.getState();
+      s.setTime(new Date('2027-01-15T02:00:00Z'));
+      await s.setZenMode(true);
+    })()
+  `)
+  await wait(1500)
+  await run(`window.__novaskyStore.getState().select('con:Ori', { focus: true })`)
+  await wait(3000)
+  // Let the crosshair settle on whatever the camera came to rest on.
+  await run(`window.__novaskyStore.getState().select(null)`)
+  await wait(1500)
+  await shoot(win, '19-zen')
+
+  await run(`
+    (() => {
+      const s = window.__novaskyStore.getState();
+      s.setAimed('star:27919');
+      s.select('star:27919');
+    })()
+  `)
+  await wait(2000)
+  await shoot(win, '20-zen-locked')
+  await run(`window.__novaskyStore.getState().setZenMode(false)`)
+  await wait(1200)
+
   const errors = await run(`window.__novaskyErrors || []`)
   if (errors.length > 0) {
     console.error('RENDERER ERRORS:', JSON.stringify(errors, null, 2))

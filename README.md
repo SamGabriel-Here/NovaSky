@@ -38,6 +38,14 @@ where you are, checked against tonight's real dark window rather than the clock.
 covers eclipses, meteor showers, conjunctions, oppositions, lunar phases and the
 solstices, and says for each one whether you can see it from your location.
 
+Press `Z` for zen mode and the window becomes nothing but sky. The rail, the bar and
+every panel go away, the cursor disappears, and a crosshair sits in the middle. Drag or
+use the arrow keys to swing it around; whatever it lands on is named under the reticle,
+and Enter locks on and brings up a single compact card. Escape steps back out one layer
+at a time.
+
+![Zen mode, locked on to Betelgeuse](docs/screenshots/20-zen-locked.png)
+
 Beginner mode strips the sky back to the bright, well-known objects. The Learn screen
 has guided activities that only complete when you actually find the thing on the map,
 plus quizzes and progress stored on your machine.
@@ -170,6 +178,8 @@ zero.
 | `S` | Focus search |
 | `B` | Toggle beginner mode |
 | `F` | Toggle fullscreen |
+| `Z` | Enter or leave zen mode |
+| `Enter` | In zen mode, lock on to whatever the crosshair is over |
 | `Esc` | Close panels |
 | Arrow keys | Look around the sky |
 | `+` / `-` | Zoom in and out |
