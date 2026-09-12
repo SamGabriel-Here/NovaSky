@@ -19,27 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-The MIT licence above covers the NovaSky source code only.
-
-The astronomical catalogues and imagery bundled in resources/ are the work of
-others and keep their own licences and attribution requirements. They are
-listed in full, with their sources, in docs/DATA_SOURCES.md. In summary:
-
-  HYG database v4.1 (stars)                     CC BY-SA 4.0
-  OpenNGC (deep-sky objects)                    CC BY-SA 4.0
-  d3-celestial (constellation figures)          BSD-3-Clause
-  moment-timezone (time-zone reference points)  MIT
-  ESO/S. Brunier, GigaGalaxy Zoom all-sky
-    panorama (resources/data/milkyway.jpg)      CC BY 4.0
-  Solar System Scope, planetary surface maps
-    (resources/data/textures/)                  CC BY 4.0
-
-Data fetched at runtime is not redistributed with this software:
-
-  CelesTrak (satellite orbital elements)
-  CDS/Aladin hips2fits and NASA SkyView (DSS survey cutouts), which serve
-    imagery from the Digitized Sky Survey; see the DSS copyright notice at
-    https://archive.stsci.edu/dss/copyright.html
